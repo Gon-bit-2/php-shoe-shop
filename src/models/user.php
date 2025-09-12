@@ -1,6 +1,7 @@
 <?php
 
-class User {
+class User
+{
     // Chỉ chứa các thuộc tính public, không có logic, không có kết nối DB
     public $id;
     public $fullname;
