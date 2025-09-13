@@ -23,6 +23,17 @@ class UserRepository
         }
         return false;
     }
+    function findUserByEmail($email)
+    {
+        $query = "SELECT email,password FROM " . $this->table . " WHERE email=:email LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":email", $email);
+        $stmt->execute();
+        if ($stmt->rowCount() > 0) {
+            return $stmt->fetch(PDO::FETCH_OBJ);
+        }
+        return false;
+    }
     function save(User $user)
     {
         $query = "INSERT INTO " . $this->table . "(fullname,email,password,role,created_at) VALUES (:fullname,:email,:password,:role,:created_at)";

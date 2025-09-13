@@ -5,7 +5,7 @@ class AuthMiddleware
     {
         $fullname = trim($data['fullname'] ?? '');
         $email = trim($data['email'] ?? '');
-        $password = $data['password'] ?? '';
+        $password = trim($data['password']);
 
         if (empty($fullname) || empty($email) || empty($password)) {
             return 'Vui lòng nhập đầy đủ thông tin!';
@@ -17,10 +17,65 @@ class AuthMiddleware
             return 'Email không đúng định dạng!';
         }
 
-        if (strlen($password) < 6) {
+        if (strlen(str_replace(' ', '', $password)) < 6) {
             return 'Mật khẩu phải có ít nhất 6 ký tự!';
         }
 
         return false;
+    }
+    function validateLoginBody($data)
+    {
+        $email = trim($data['email'] ?? '');
+        $password = trim($data['password']);
+
+
+        if (empty($email) || empty($password)) {
+            return 'Vui lòng nhập đầy đủ thông tin!';
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return 'Email không đúng định dạng!';
+        }
+
+        if (strlen(str_replace(' ', '', $password)) < 6) {
+            return 'Mật khẩu phải có ít nhất 6 ký tự!';
+        }
+
+        return false;
+    }
+    function requireAuth()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user'])) {
+            header('Location: /shoe-shop/public/login');
+            exit();
+        }
+        return true;
+    }
+    function redirectIfAuthenticated()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
+            header('Location: /shoe-shop/public/');
+            exit();
+        }
+    }
+    function applyGlobalMiddleware($path)
+    {
+        $routes = require_once '../src/config/routes.php';
+
+        //  cần authentication
+        if (in_array($path, $routes['protected'])) {
+            $this->requireAuth();
+        }
+        //
+        if (in_array($path, ['/login', '/register'])) {
+            $this->redirectIfAuthenticated();
+        }
     }
 }

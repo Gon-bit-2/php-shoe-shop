@@ -1,5 +1,8 @@
 <?php require_once '../src/models/repositories/database.php';
-
+require_once '../src/middleware/auth.middleware.php';
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $path = str_replace('/shoe-shop/public', '', $_SERVER['REQUEST_URI']);
 $path = parse_url($path, PHP_URL_PATH);
 if ($path === '') {
@@ -7,7 +10,8 @@ if ($path === '') {
 }
 //
 $method = $_SERVER['REQUEST_METHOD'];
-
+$authMiddleware = new AuthMiddleware();
+$authMiddleware->applyGlobalMiddleware($path);
 
 switch ($path) {
     case '/':
@@ -20,8 +24,6 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->showRegisterForm();
         } elseif ($method == 'POST') {
-            require_once '../src/middleware/auth.middleware.php';
-            $authMiddleware = new AuthMiddleware();
             $errorMessage = $authMiddleware->validateRegisterBody($_POST);
             if ($errorMessage) {
                 $message = $errorMessage;
@@ -34,7 +36,25 @@ switch ($path) {
         break;
 
     case '/login':
-        echo ('Đây là trang đăng nhập');
+        require_once '../src/controllers/auth.controller.php';
+        $controller = new AuthController($conn);
+        if ($method == 'GET') {
+            $controller->showLoginForm();
+        } elseif ($method == 'POST') {
+            $errorMessage = $authMiddleware->validateLoginBody($_POST);
+            if ($errorMessage) {
+                $message = $errorMessage;
+                $controller->showLoginForm($message, $_POST);
+                exit();
+            } else {
+                $controller->login();
+            }
+        }
+        break;
+    case '/logout':
+        require_once '../src/controllers/auth.controller.php';
+        $controller = new AuthController($conn);
+        $controller->logout();
         break;
     default:
         # code...

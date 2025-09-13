@@ -16,7 +16,7 @@ class AuthController
     {
         $fullname = trim($_POST['fullname']);
         $email = trim($_POST['email']);
-        $password = $_POST['password'];
+        $password = trim($_POST['password']);
         $result = $this->authService->register($fullname, $email, $password);
         if ($result) {
             // Đăng ký thành công
@@ -28,5 +28,30 @@ class AuthController
             // Nạp lại view và truyền ra biến $message
             require_once '../src/views/register.php';
         }
+    }
+    function showLoginForm($message = '', $oldInput = [])
+    {
+        $errorMessage = $message;
+        require_once '../src/views/login.php';
+    }
+    function login()
+    {
+        $email = trim($_POST['email']);
+        $password = trim($_POST['password']);
+        $loginResult = $this->authService->login($email, $password);
+        if ($loginResult->status == true) {
+            $_SESSION['user'] = $loginResult->user;
+            header('Location: /shoe-shop/public/');
+            exit();
+        } else {
+            $message = $loginResult->message;
+            require_once '../src/views/login.php';
+        }
+    }
+    function logout()
+    {
+        session_destroy();
+        header('Location: /shoe-shop/public/');
+        exit();
     }
 }
