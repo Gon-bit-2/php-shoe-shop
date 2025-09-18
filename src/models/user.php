@@ -7,6 +7,6 @@ class User
     public $fullname;
     public $email;
     public $password;
-    public $role;
+    public $role_id;
     public $created_at;
 }

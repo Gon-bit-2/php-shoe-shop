@@ -56,8 +56,17 @@ switch ($path) {
         $controller = new AuthController($conn);
         $controller->logout();
         break;
+
+    case '/admin/products/create':
+        require_once '../src/controllers/product.controller.php';
+        $controller = new ProductController($conn);
+        if ($method == 'GET') {
+            $controller->create();
+        } elseif ($method == 'POST') {
+            $controller->store();
+        }
+        break;
     default:
-        # code...
         echo "404 - Trang không tồn tại";
         break;
 }

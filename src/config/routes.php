@@ -12,6 +12,6 @@ return [
     'protected' => [
         '/dashboard',
         '/profile',
-        '/orders'
+        '/orders',
     ]
 ];

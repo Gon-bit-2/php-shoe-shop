@@ -18,9 +18,10 @@ class AuthService
         $user = new User();
         $user->fullname = $fullname;
         $user->email = $email;
-        $user->password = $password;
+        $user->password = password_hash($password, PASSWORD_DEFAULT);;
         //3.save user
-        return $this->userRepository->save($user);
+        $newUser = $this->userRepository->save($user);
+        return $newUser;
     }
     function login($email, $password)
     {
@@ -31,6 +32,9 @@ class AuthService
         if (!password_verify($password, $user->password)) {
             return (object)['message' => 'Mật khẩu không đúng', 'status' => false];
         }
+        // if (headers_sent($file, $line)) {
+        //     die("Lỗi: Headers đã được gửi đi tại file: $file ở dòng: $line");
+        // }
         return (object)['message' => 'Đăng nhập thành công', 'status' => true, 'user' => $user];
     }
 }

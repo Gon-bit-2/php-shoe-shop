@@ -36,20 +36,20 @@ class UserRepository
     }
     function save(User $user)
     {
-        $query = "INSERT INTO " . $this->table . "(fullname,email,password,role,created_at) VALUES (:fullname,:email,:password,:role,:created_at)";
+        $query = "INSERT INTO " . $this->table . "(fullname,email,password,role_id,created_at) VALUES (:fullname,:email,:password,:role_id,:created_at)";
         $stmt = $this->conn->prepare($query);
 
         //clean data
         $user->fullname = htmlspecialchars($user->fullname);
         $user->email = htmlspecialchars($user->email);
-        $user->password = password_hash($user->password, PASSWORD_DEFAULT);
-        $user->role = 'user';
+        $user->password = $user->password;
+        $user->role_id = 2;
         $user->created_at = date('Y-m-d H:i:s');
         //
         $stmt->bindParam(":fullname", $user->fullname);
         $stmt->bindParam(":email", $user->email);
         $stmt->bindParam(":password", $user->password);
-        $stmt->bindParam(":role", $user->role);
+        $stmt->bindParam(":role_id", $user->role_id);
         $stmt->bindParam(":created_at", $user->created_at);
         if ($stmt->execute()) {
             return true;
