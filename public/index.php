@@ -56,7 +56,22 @@ switch ($path) {
         $controller = new AuthController($conn);
         $controller->logout();
         break;
+    case '/admin/products':
+        require_once '../src/controllers/product.controller.php';
+        $controller = new ProductController($conn);
+        $controller->getAllProducts();
+        break;
+        // Xử lý route động cho trang edit
+        if (preg_match('/^\/admin\/products\/edit\/(\d+)$/', $path, $matches)) {
+            require_once '../src/controllers/product.controller.php';
+            $controller = new ProductController($conn);
+            $productId = $matches[1]; // Lấy ra ID từ URL
 
+            if ($method == 'GET') {
+                $controller->edit($productId); // Gọi hàm edit với ID vừa lấy được
+            }
+            break;
+        }
     case '/admin/products/create':
         require_once '../src/controllers/product.controller.php';
         $controller = new ProductController($conn);

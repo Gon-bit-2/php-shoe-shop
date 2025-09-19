@@ -38,7 +38,26 @@ try {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     $conn->exec($sql_categories);
     echo " -> Bảng 'categories' đã được tạo.\n";
+    // ... trong file migrations/20250918_add_product_relations.php
+    // Ngay sau lệnh $conn->exec($sql_categories);
 
+    // --- BẮT ĐẦU ĐOẠN CODE MỚI ---
+
+    echo " -> Chèn dữ liệu mẫu cho 'categories'...\n";
+    // Dùng INSERT IGNORE để không báo lỗi nếu dữ liệu đã tồn tại
+    $conn->exec("INSERT IGNORE INTO categories (name, slug) VALUES
+    ('Giày chạy bộ', 'giay-chay-bo'),
+    ('Giày thời trang', 'giay-thoi-trang'),
+    ('Giày công sở', 'giay-cong-so'),
+    ('Giày đá bóng', 'giay-da-bong');
+");
+    echo " -> Xong.\n";
+
+    // --- KẾT THÚC ĐOẠN CODE MỚI ---
+
+    // Bảng PRODUCTS (giữ nguyên)
+    $sql_products = "CREATE TABLE products (...)";
+    // ...
     // Bảng PRODUCTS
     $sql_products = "CREATE TABLE products (
         id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,

@@ -31,4 +31,17 @@ class ProductController
             require_once __DIR__ . '/../views/admin/products/create.php';
         }
     }
+    function getAllProducts()
+    {
+        $products = $this->productService->getAllProducts();
+        require_once __DIR__ . '/../views/admin/products/index.php';
+    }
+    public function edit($id)
+    {
+
+        $product = $this->productService->getProductById($id);
+        $categories = $this->productService->getAllCategories();
+        $categoryIDs = $this->productService->getCategoryByProductId($id);
+        require_once __DIR__ . '/../views/admin/products/edit.php';
+    }
 }

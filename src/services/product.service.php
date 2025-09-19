@@ -16,6 +16,7 @@ class ProductService
     }
     public function createProduct($data)
     {
+        $categoryIDs = $data['categories'] ?? [];
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
         $product = new Product();
         $product->name = $data['name'];
@@ -26,6 +27,18 @@ class ProductService
         $product->is_active = $data['is_active'];
         $product->created_at = date('Y-m-d H:i:s');
         $product->updated_at = date('Y-m-d H:i:s');
-        return $this->productRepository->save($product);
+        return $this->productRepository->save($product, $categoryIDs);
+    }
+    function getAllProducts()
+    {
+        return $this->productRepository->findAll();
+    }
+    function getProductById($id)
+    {
+        return $this->productRepository->findById($id);
+    }
+    function getCategoryByProductId($productId)
+    {
+        return $this->productRepository->findCategoryByProductId($productId);
     }
 }

@@ -12,6 +12,6 @@ class CategoryRepository
         $query = "SELECT * FROM categories";
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_OBJ);
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Category');
     }
 }

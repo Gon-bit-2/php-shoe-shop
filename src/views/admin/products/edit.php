@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Thêm Sản phẩm mới</title>
+    <title>Chỉnh sửa sản phẩm</title>
     <link href="/shoe-shop/public/css/style.css" rel="stylesheet">
 </head>
 
@@ -15,10 +15,10 @@
             <div class="bg-red-100 text-red-700 p-4 rounded mb-4"><?= $errorMessage ?></div>
         <?php endif; ?>
 
-        <form action="/shoe-shop/public/admin/products/create" method="POST">
+        <form action="/shoe-shop/public/admin/products/edit/<?= $product->id ?>" method="POST">
             <div class="mb-4">
                 <label for="name" class="block text-gray-700 font-bold mb-2">Tên sản phẩm:</label>
-                <input type="text" name="name" id="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                <input type="text" name="name" value="<?= htmlspecialchars($product->name) ?>">
             </div>
             <div class="mb-4">
                 <label for="cost_price" class="block text-gray-700 font-bold mb-2">Giá vốn:</label>
@@ -26,7 +26,10 @@
             </div>
             <div class="mb-4">
                 <label for="is_active" class="block text-gray-700 font-bold mb-2">Trạng thái:</label>
-                <input type="checkbox" name="is_active" id="is_active">
+                <?php
+                $isChecked = $product->is_active;
+                ?>
+                <input type="checkbox" name="is_active" id="is_active" <?= $isChecked ? 'checked' : '' ?>>
             </div>
             <div class="mb-4">
                 <label for="base_price" class="block text-gray-700 font-bold mb-2">Giá gốc:</label>
@@ -46,7 +49,10 @@
                 <label class="block text-gray-700 font-bold mb-2">Danh mục:</label>
                 <?php foreach ($categories as $category): ?>
                     <label class="inline-flex items-center mr-4">
-                        <input type="checkbox" name="categories[]" value="<?= $category->id ?>" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
+                        <?php
+                        $isChecked = in_array($category->id, $categoryIDs);
+                        ?>
+                        <input type="checkbox" name="categories[]" value="<?= $category->id ?>" <?= $isChecked ? 'checked' : '' ?>>
                         <span class="ml-2 text-gray-700"><?= htmlspecialchars($category->name) ?></span>
                     </label>
                 <?php endforeach; ?>
