@@ -41,4 +41,20 @@ class ProductService
     {
         return $this->productRepository->findCategoryByProductId($productId);
     }
+    function updateProduct($data)
+    {
+        $categoryIDs = $data['categories'] ?? [];
+        $product = new Product();
+        $product->id = $data['id'];
+        $product->name = $data['name'];
+        $product->sku = $data['sku'];
+        $product->slug = $data['slug'];
+        $product->short_desc = $data['short_desc'];
+        $product->description = $data['description'];
+        $product->base_price = $data['base_price'];
+        $product->cost_price = $data['cost_price'];
+        $product->is_active = $data['is_active'];
+        $product->updated_at = date('Y-m-d H:i:s');
+        return $this->productRepository->update($product, $categoryIDs);
+    }
 }

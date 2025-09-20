@@ -61,6 +61,17 @@ switch ($path) {
         $controller = new ProductController($conn);
         $controller->getAllProducts();
         break;
+
+    case '/admin/products/create':
+        require_once '../src/controllers/product.controller.php';
+        $controller = new ProductController($conn);
+        if ($method == 'GET') {
+            $controller->create();
+        } elseif ($method == 'POST') {
+            $controller->store();
+        }
+        break;
+    default:
         // Xử lý route động cho trang edit
         if (preg_match('/^\/admin\/products\/edit\/(\d+)$/', $path, $matches)) {
             require_once '../src/controllers/product.controller.php';
@@ -72,16 +83,6 @@ switch ($path) {
             }
             break;
         }
-    case '/admin/products/create':
-        require_once '../src/controllers/product.controller.php';
-        $controller = new ProductController($conn);
-        if ($method == 'GET') {
-            $controller->create();
-        } elseif ($method == 'POST') {
-            $controller->store();
-        }
-        break;
-    default:
         echo "404 - Trang không tồn tại";
         break;
 }

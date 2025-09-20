@@ -51,7 +51,8 @@ class ProductRepository
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
         $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_CLASS, 'Product');
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Product');
+        return $stmt->fetch();
     }
     function findCategoryByProductId($productId)
     {
@@ -60,5 +61,39 @@ class ProductRepository
         $stmt->bindParam(":productId", $productId);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
+    }
+    function update(Product $product, array $categoryIDs)
+    {
+        try {
+            $this->conn->beginTransaction();
+            $query = "UPDATE products SET name=:name,sku=:sku,slug=:slug,short_desc=:short_desc,description=:description,base_price=:base_price,cost_price=:cost_price,is_active=:is_active,updated_at=:updated_at WHERE id=:id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(":id", $product->id);
+            $stmt->bindParam(":name", $product->name);
+            $stmt->bindParam(":sku", $product->sku);
+            $stmt->bindParam(":slug", $product->slug);
+            $stmt->bindParam(":short_desc", $product->short_desc);
+            $stmt->bindParam(":description", $product->description);
+            $stmt->bindParam(":base_price", $product->base_price);
+            $stmt->bindParam(":cost_price", $product->cost_price);
+            $stmt->bindParam(":is_active", $product->is_active);
+            $stmt->bindParam(":updated_at", $product->updated_at);
+            $stmt->execute();
+            $deleteQuery = "DELETE FROM product_category_map WHERE product_id = :product_id";
+            $deleteStmt = $this->conn->prepare($deleteQuery);
+            $deleteStmt->execute([':product_id' => $product->id]);
+            if (!empty($categoryIDs)) {
+                $mapQuery = "INSERT INTO product_category_map (product_id,category_id) VALUES (:product_id,:category_id)";
+                $mapStmt = $this->conn->prepare($mapQuery);
+                foreach ($categoryIDs as $categoryID) {
+                    $mapStmt->execute([':product_id' => $product->id, ':category_id' => $categoryID]);
+                }
+            }
+            $this->conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return false;
+        }
     }
 }

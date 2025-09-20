@@ -47,8 +47,8 @@
                                         </span>
                                     <?php else: ?>
                                         <span class="relative inline-block px-3 py-1 font-semibold text-red-900 leading-tight">
-                                            <span aria-hidden class="absolute inset-0 bg-red-200 opacity-50 rounded-full"></span>
-                                            <span class="relative">Inactive</span>
+                                            <span aria-hidden class="absolute inset-0 bg-green-400 opacity-50 rounded-full"></span>
+                                            <span class="relative text-white">Inactive</span>
                                         </span>
                                     <?php endif; ?>
                                 </td>

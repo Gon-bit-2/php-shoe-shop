@@ -22,7 +22,7 @@
             </div>
             <div class="mb-4">
                 <label for="cost_price" class="block text-gray-700 font-bold mb-2">Giá vốn:</label>
-                <input type="number" step="0.01" name="cost_price" id="cost_price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+                <input type="number" step="0.01" name="cost_price" id="cost_price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value="<?= $product->cost_price ?>">
             </div>
             <div class="mb-4">
                 <label for="is_active" class="block text-gray-700 font-bold mb-2">Trạng thái:</label>
@@ -33,15 +33,15 @@
             </div>
             <div class="mb-4">
                 <label for="base_price" class="block text-gray-700 font-bold mb-2">Giá gốc:</label>
-                <input type="number" step="0.01" name="base_price" id="base_price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
+                <input type="number" step="0.01" name="base_price" id="base_price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value="<?= $product->base_price ?>" required>
             </div>
             <div class="mb-4">
                 <label for="short_desc" class="block text-gray-700 font-bold mb-2">Mô tả ngắn:</label>
-                <textarea name="short_desc" id="short_desc" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"></textarea>
+                <textarea name="short_desc" id="short_desc" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"><?= $product->short_desc ?> </textarea>
             </div>
             <div class="mb-4">
                 <label for="description" class="block text-gray-700 font-bold mb-2">Mô tả chi tiết:</label>
-                <textarea name="description" id="description" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"></textarea>
+                <textarea name="description" id="description" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"><?= $product->description ?></textarea>
             </div>
 
 
@@ -59,7 +59,7 @@
             </div>
             <div class="flex items-center justify-between">
                 <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Lưu sản phẩm
+                    <a href="/shoe-shop/public/admin/products">Lưu sản phẩm</a>
                 </button>
                 <a href="/shoe-shop/public/admin/products" class="bg-red-500 hover:bg-red-700 text-white font-bold text-sm px-4 py-2 rounded">
                     Hủy
