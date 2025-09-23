@@ -11,56 +11,75 @@
     <div class="container mx-auto mt-10 p-8 bg-white shadow-md rounded-lg">
         <h1 class="text-3xl font-bold mb-6">Thêm Sản phẩm mới</h1>
 
-        <?php if (isset($errorMessage)): ?>
-            <div class="bg-red-100 text-red-700 p-4 rounded mb-4"><?= $errorMessage ?></div>
+        <?php if (isset($errorMessage) && !empty($errorMessage)): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <strong class="font-bold">Lỗi!</strong>
+                <span class="block sm:inline"><?= htmlspecialchars($errorMessage) ?></span>
+            </div>
         <?php endif; ?>
 
-        <form action="/shoe-shop/public/admin/products/create" method="POST">
+        <form action="/shoe-shop/public/admin/products/create" method="POST" enctype="multipart/form-data" novalidate>
             <div class="mb-4">
                 <label for="name" class="block text-gray-700 font-bold mb-2">Tên sản phẩm:</label>
-                <input type="text" name="name" id="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
-            </div>
-            <div class="mb-4">
-                <label for="cost_price" class="block text-gray-700 font-bold mb-2">Giá vốn:</label>
-                <input type="number" step="0.01" name="cost_price" id="cost_price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
-            </div>
-            <div class="mb-4">
-                <label for="is_active" class="block text-gray-700 font-bold mb-2">Trạng thái:</label>
-                <input type="checkbox" name="is_active" id="is_active">
-            </div>
-            <div class="mb-4">
-                <label for="base_price" class="block text-gray-700 font-bold mb-2">Giá gốc:</label>
-                <input type="number" step="0.01" name="base_price" id="base_price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" required>
-            </div>
-            <div class="mb-4">
-                <label for="short_desc" class="block text-gray-700 font-bold mb-2">Mô tả ngắn:</label>
-                <textarea name="short_desc" id="short_desc" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"></textarea>
-            </div>
-            <div class="mb-4">
-                <label for="description" class="block text-gray-700 font-bold mb-2">Mô tả chi tiết:</label>
-                <textarea name="description" id="description" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"></textarea>
+                <input type="text" name="name" id="name" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value="<?= htmlspecialchars($oldInput['name'] ?? '') ?>" required>
             </div>
 
+            <div class="mb-4">
+                <label for="image_url" class="block text-gray-700 font-bold mb-2">Ảnh đại diện sản phẩm:</label>
+                <input type="file" name="image" id="image_url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="price" class="block text-gray-700 font-bold mb-2">Giá bán (VNĐ):</label>
+                    <input type="number" step="1000" name="price" id="price" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value="<?= htmlspecialchars($oldInput['price'] ?? '') ?>" required>
+                </div>
+
+                <div class="mb-4">
+                    <label for="stock" class="block text-gray-700 font-bold mb-2">Số lượng tồn kho:</label>
+                    <input type="number" name="stock" id="stock" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700" value="<?= htmlspecialchars($oldInput['stock'] ?? '0') ?>" required>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700 font-bold mb-2">Mô tả chi tiết:</label>
+                <textarea name="description" id="description" rows="6" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"><?= htmlspecialchars($oldInput['description'] ?? '') ?></textarea>
+            </div>
 
             <div class="mb-6">
                 <label class="block text-gray-700 font-bold mb-2">Danh mục:</label>
-                <?php foreach ($categories as $category): ?>
-                    <label class="inline-flex items-center mr-4">
-                        <input type="checkbox" name="categories[]" value="<?= $category->id ?>" class="h-5 w-5 text-blue-600 rounded focus:ring-blue-500">
-                        <span class="ml-2 text-gray-700"><?= htmlspecialchars($category->name) ?></span>
-                    </label>
-                <?php endforeach; ?>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <?php if (!empty($categories)): ?>
+                        <?php foreach ($categories as $category): ?>
+                            <?php
+                            $oldCategoryIDs = $oldInput['categories'] ?? [];
+                            $isChecked = in_array($category->id, $oldCategoryIDs);
+                            ?>
+                            <label class="inline-flex items-center">
+                                <input type="checkbox" name="categories[]" value="<?= $category->id ?>" class="h-5 w-5 text-blue-600 rounded" <?= $isChecked ? 'checked' : '' ?>>
+                                <span class="ml-2 text-gray-700"><?= htmlspecialchars($category->name) ?></span>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
             </div>
-            <div class="flex items-center justify-between">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
-                    Lưu sản phẩm
-                </button>
-                <a href="/shoe-shop/public/admin/products" class="bg-red-500 hover:bg-red-700 text-white font-bold text-sm px-4 py-2 rounded">
+
+            <div class="mb-6">
+                <label class="block text-gray-700 font-bold mb-2">Trạng thái:</label>
+                <label class="inline-flex items-center">
+                    <?php
+                    $isActive = isset($oldInput['is_active']) || !isset($oldInput);
+                    ?>
+                    <input type="checkbox" name="is_active" id="is_active" value="1" class="h-5 w-5 text-blue-600 rounded" <?= $isActive ? 'checked' : '' ?>>
+                    <span class="ml-2 text-gray-700">Kích hoạt sản phẩm</span>
+                </label>
+            </div>
+
+            <div class="flex items-center justify-end gap-4">
+                <a href="/shoe-shop/public/admin/products" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
                     Hủy
                 </a>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Lưu sản phẩm
+                </button>
             </div>
-        </form>
-    </div>
-</body>
-
-</html>
+            </

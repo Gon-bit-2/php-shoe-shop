@@ -20,6 +20,7 @@
                 <thead>
                     <tr>
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tên sản phẩm</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ảnh</th>
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Giá</th>
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50"></th>
@@ -37,7 +38,14 @@
                                     <p class="text-gray-900 whitespace-no-wrap"><?= htmlspecialchars($product->name) ?></p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap"><?= number_format($product->base_price) ?> VNĐ</p>
+                                    <?php if (!empty($product->image_url)): ?>
+                                        <img src="/shoe-shop/public<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>" class="w-16 h-16 object-cover rounded">
+                                    <?php else: ?>
+                                        <span class="text-gray-400">Không có ảnh</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <p class="text-gray-900 whitespace-no-wrap"><?= number_format($product->price) ?> VNĐ</p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                     <?php if ($product->is_active): ?>

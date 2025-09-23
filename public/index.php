@@ -1,5 +1,6 @@
 <?php require_once '../src/models/repositories/database.php';
 require_once '../src/middleware/auth.middleware.php';
+require_once '../src/middleware/product.middleware.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,6 +13,7 @@ if ($path === '') {
 $method = $_SERVER['REQUEST_METHOD'];
 $authMiddleware = new AuthMiddleware();
 $authMiddleware->applyGlobalMiddleware($path);
+$productMiddleware = new ProductMiddleware();
 
 switch ($path) {
     case '/':
@@ -68,6 +70,11 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->create();
         } elseif ($method == 'POST') {
+            $errorMessage = $productMiddleware->validateProductBody($_POST);
+            if ($errorMessage) {
+                $controller->create($errorMessage, $_POST);
+                exit();
+            }
             $controller->store();
         }
         break;
@@ -79,7 +86,15 @@ switch ($path) {
             $productId = $matches[1]; // Lấy ra ID từ URL
 
             if ($method == 'GET') {
-                $controller->edit($productId); // Gọi hàm edit với ID vừa lấy được
+                $controller->getEditPage($productId); // Gọi hàm edit với ID vừa lấy được
+            } elseif ($method == 'POST') {
+                $errorMessage = $productMiddleware->validateProductBody($_POST);
+                if ($errorMessage) {
+                    $controller->getEditPage($productId, $errorMessage, $_POST);
+                    exit();
+                } else {
+                    $controller->update($productId, $_POST);
+                }
             }
             break;
         }

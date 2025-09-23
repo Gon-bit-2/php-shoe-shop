@@ -61,7 +61,6 @@ try {
     // Bảng PRODUCTS
     $sql_products = "CREATE TABLE products (
         id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-        sku VARCHAR(64) UNIQUE,
         name VARCHAR(191) NOT NULL,
         slug VARCHAR(191) NOT NULL UNIQUE,
         short_desc VARCHAR(500),
@@ -103,7 +102,6 @@ try {
     $sql_product_variants = "CREATE TABLE product_variants (
         id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
         product_id BIGINT UNSIGNED NOT NULL,
-        sku VARCHAR(64) UNIQUE,
         name VARCHAR(191),
         attributes JSON, -- {\"size\":\"M\",\"color\":\"Black\"}
         price DECIMAL(12,2) NOT NULL,
