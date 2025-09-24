@@ -1,4 +1,5 @@
-<?php require_once '../src/models/repositories/database.php';
+<?php
+require_once '../src/models/repositories/database.php';
 require_once '../src/middleware/auth.middleware.php';
 require_once '../src/middleware/product.middleware.php';
 if (session_status() === PHP_SESSION_NONE) {
@@ -58,6 +59,11 @@ switch ($path) {
         $controller = new AuthController($conn);
         $controller->logout();
         break;
+    case '/admin':
+        require_once '../src/controllers/dashBoard.controller.php';
+        $controller = new DashBoardController($conn);
+        $controller->index();
+        break;
     case '/admin/products':
         require_once '../src/controllers/product.controller.php';
         $controller = new ProductController($conn);
@@ -95,6 +101,16 @@ switch ($path) {
                 } else {
                     $controller->update($productId, $_POST);
                 }
+            }
+            break;
+        }
+
+        if (preg_match('/^\/admin\/products\/delete\/(\d+)$/', $path, $matches)) {
+            if ($method == 'POST') {
+                require_once '../src/controllers/product.controller.php';
+                $controller = new ProductController($conn);
+                $productId = $matches[1];
+                $controller->delete($productId);
             }
             break;
         }

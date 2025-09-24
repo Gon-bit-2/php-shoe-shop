@@ -68,4 +68,12 @@ class ProductController
             require_once __DIR__ . '/../views/admin/products/edit.php';
         }
     }
+    public function delete($id)
+    {
+        $result = $this->productService->deleteProduct($id);
+        if ($result) {
+            header('Location: /shoe-shop/public/admin/products');
+            exit();
+        }
+    }
 }

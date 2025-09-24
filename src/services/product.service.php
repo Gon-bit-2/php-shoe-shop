@@ -47,36 +47,45 @@ class ProductService
     }
     function updateProduct($id, $data)
     {
-        // 1. Lấy ra sản phẩm hiện tại từ database
         $product = $this->productRepository->findById($id);
         if (!$product) {
-            return false; // Trả về false nếu không tìm thấy sản phẩm
+            return false;
         }
+
+        // Mặc định, giữ lại ảnh cũ
+        $imageUrl = $product->image_url;
+        $oldImagePath = $product->image_url;
+        // Nếu có ảnh mới được upload, thì xử lý và cập nhật lại $imageUrl
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            // (TODO: Bạn có thể thêm logic xóa file ảnh cũ ở đây nếu cần)
             $imageUrl = $this->handleImageUpload($_FILES['image']);
+            // Nếu upload ảnh mới thành công VÀ có ảnh cũ tồn tại
+            if ($imageUrl && !empty($oldImagePath)) {
+                // Tạo đường dẫn vật lý đầy đủ đến file ảnh cũ
+                $fullOldPath = __DIR__ . '/../../public' . $oldImagePath;
+
+                // Kiểm tra xem file có thật sự tồn tại không trước khi xóa
+                if (file_exists($fullOldPath)) {
+                    unlink($fullOldPath); // Xóa file
+                }
+            }
         }
-        // 2. Cập nhật các thuộc tính của đối tượng product với dữ liệu mới từ form
+
+        // Cập nhật các thuộc tính
         $product->name = $data['name'];
         $product->description = $data['description'];
         $product->price = $data['price'];
-        $product->image_url = $imageUrl;
+        $product->image_url = $imageUrl; // Gán đường dẫn ảnh mới hoặc giữ lại ảnh cũ
         $product->stock = $data['stock'];
-
-        // 3. Xử lý logic cho checkbox 'is_active'
-        // Nếu checkbox được tick, $data['is_active'] sẽ là '1'. Nếu không, nó sẽ không tồn tại.
         $product->is_active = isset($data['is_active']) ? 1 : 0;
-
-        // 4. Tạo slug mới dựa trên tên mới
         $product->slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
-
         $product->updated_at = date('Y-m-d H:i:s');
 
-        // 5. Lấy danh sách category IDs mới
         $categoryIDs = $data['categories'] ?? [];
 
-        // 6. Ra lệnh cho Repository cập nhật sản phẩm với thông tin mới
         return $this->productRepository->update($product, $categoryIDs);
     }
+
     function handleImageUpload($file)
     {
         // Kiểm tra xem có lỗi upload không
@@ -106,5 +115,9 @@ class ProductService
         }
 
         return null; // Di chuyển thất bại
+    }
+    function deleteProduct($id)
+    {
+        return $this->productRepository->delete($id);
     }
 }

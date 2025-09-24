@@ -8,6 +8,7 @@
 </head>
 
 <body class="bg-gray-100">
+    <?php require_once __DIR__ . '/../partials/navbar.php'; ?>
     <div class="container mx-auto mt-10 p-8 bg-white shadow-md rounded-lg">
         <h1 class="text-3xl font-bold mb-6">Sửa Sản phẩm</h1>
 
@@ -25,8 +26,15 @@
             </div>
 
             <div class="mb-4">
-                <label for="image_url" class="block text-gray-700 font-bold mb-2">Ảnh đại diện sản phẩm:</label>
-                <input type="file" name="image" id="image_url" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
+                <label for="image" class="block text-gray-700 font-bold mb-2">Ảnh đại diện sản phẩm:</label>
+
+                <?php if (!empty($product->image_url)): ?>
+                    <div class="mb-2">
+                        <img src="/shoe-shop/public<?= htmlspecialchars($product->image_url) ?>" alt="Ảnh hiện tại" class="w-32 h-32 object-cover rounded">
+                        <p class="text-sm text-gray-500 mt-1">Ảnh hiện tại. Chọn file mới để thay thế.</p>
+                    </div>
+                <?php endif; ?>
+                <input type="file" name="image" id="image" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="mb-4">

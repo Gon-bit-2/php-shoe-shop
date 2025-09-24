@@ -100,4 +100,15 @@ class ProductRepository
             return false;
         }
     }
+    public function delete($id)
+    {
+        try {
+            $query = "DELETE FROM products WHERE id = :id";
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':id', $id);
+            return $stmt->execute();
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
 }

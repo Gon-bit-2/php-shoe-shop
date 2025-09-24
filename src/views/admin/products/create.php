@@ -8,6 +8,7 @@
 </head>
 
 <body class="bg-gray-100">
+    <?php require_once __DIR__ . '/../partials/navbar.php'; ?>
     <div class="container mx-auto mt-10 p-8 bg-white shadow-md rounded-lg">
         <h1 class="text-3xl font-bold mb-6">Thêm Sản phẩm mới</h1>
 

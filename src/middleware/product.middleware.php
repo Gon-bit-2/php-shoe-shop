@@ -25,9 +25,6 @@ class ProductMiddleware
         if (!is_numeric($stock) || $stock <= 0) {
             return 'Số lượng sản phẩm phải là một số lớn hơn 0!';
         }
-        if (empty($is_active)) {
-            return 'Trạng thái sản phẩm không được để trống!';
-        }
         if (empty($description)) {
             return 'Mô tả sản phẩm không được để trống!';
         }
