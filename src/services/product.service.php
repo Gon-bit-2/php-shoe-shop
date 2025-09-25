@@ -120,4 +120,8 @@ class ProductService
     {
         return $this->productRepository->delete($id);
     }
+    function getAllProductsActive()
+    {
+        return $this->productRepository->findAllProductActive();
+    }
 }

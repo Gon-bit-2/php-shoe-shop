@@ -52,12 +52,17 @@ class ProductRepository
     }
     function findById($id)
     {
+        if (empty($id) || !is_numeric($id)) {
+            return null;
+        }
         $query = "SELECT * FROM products WHERE id=:id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":id", $id);
         $stmt->execute();
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Product');
-        return $stmt->fetch();
+        $result = $stmt->fetch();
+
+        return $result === false ? null : $result;
     }
     function findCategoryByProductId($productId)
     {
@@ -110,5 +115,22 @@ class ProductRepository
         } catch (PDOException $e) {
             return false;
         }
+    }
+    public function findAllProductActive()
+    {
+        // Câu lệnh JOIN phức tạp để lấy thêm tên danh mục
+        // Chúng ta dùng LEFT JOIN để sản phẩm nào chưa có danh mục vẫn hiển thị
+        // GROUP_CONCAT để gộp nhiều tên danh mục vào một chuỗi
+        $query = "SELECT p.*, GROUP_CONCAT(c.name SEPARATOR ', ') as category_names
+              FROM products p
+              LEFT JOIN product_category_map pcm ON p.id = pcm.product_id
+              LEFT JOIN categories c ON pcm.category_id = c.id
+              WHERE p.is_active = 1
+              GROUP BY p.id
+              ORDER BY p.created_at DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
     }
 }

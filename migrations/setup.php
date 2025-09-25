@@ -2,6 +2,9 @@
 require_once '../src/models/repositories/database.php';
 
 try {
+    $conn->exec("DROP TABLE IF EXISTS roles;");
+    $conn->exec("DROP TABLE IF EXISTS users;");
+    echo " -> Các bảng phức tạp cũ đã được xóa.\n";
     // -- Bảng 1: ROLES --
     $conn->exec("CREATE TABLE IF NOT EXISTS roles (
         id INT AUTO_INCREMENT PRIMARY KEY,

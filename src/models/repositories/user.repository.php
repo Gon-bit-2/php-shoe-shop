@@ -25,12 +25,16 @@ class UserRepository
     }
     function findUserByEmail($email)
     {
-        $query = "SELECT email,password FROM " . $this->table . " WHERE email=:email LIMIT 1";
+        // Lấy tất cả các cột
+        $query = "SELECT * FROM " . $this->table . " WHERE email=:email LIMIT 1";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":email", $email);
         $stmt->execute();
+
         if ($stmt->rowCount() > 0) {
-            return $stmt->fetch(PDO::FETCH_OBJ);
+            // Trả về một đối tượng User hoàn chỉnh
+            $stmt->setFetchMode(PDO::FETCH_CLASS, 'User');
+            return $stmt->fetch();
         }
         return false;
     }

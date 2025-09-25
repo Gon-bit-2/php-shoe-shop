@@ -2,6 +2,9 @@
 require_once '../src/models/repositories/database.php';
 require_once '../src/middleware/auth.middleware.php';
 require_once '../src/middleware/product.middleware.php';
+require_once '../src/controllers/product.controller.php';
+require_once '../src/controllers/auth.controller.php';
+require_once '../src/controllers/dashBoard.controller.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -18,11 +21,11 @@ $productMiddleware = new ProductMiddleware();
 
 switch ($path) {
     case '/':
-    case 'home':
-        echo ('Trang Chủ');
+    case '/home': // Thêm dấu / cho nhất quán
+        $controller = new ProductController($conn);
+        $controller->getAllProductsActive();
         break;
     case '/register':
-        require_once '../src/controllers/auth.controller.php';
         $controller = new AuthController($conn);
         if ($method == 'GET') {
             $controller->showRegisterForm();
@@ -39,7 +42,6 @@ switch ($path) {
         break;
 
     case '/login':
-        require_once '../src/controllers/auth.controller.php';
         $controller = new AuthController($conn);
         if ($method == 'GET') {
             $controller->showLoginForm();
@@ -55,23 +57,19 @@ switch ($path) {
         }
         break;
     case '/logout':
-        require_once '../src/controllers/auth.controller.php';
         $controller = new AuthController($conn);
         $controller->logout();
         break;
     case '/admin':
-        require_once '../src/controllers/dashBoard.controller.php';
         $controller = new DashBoardController($conn);
         $controller->index();
         break;
     case '/admin/products':
-        require_once '../src/controllers/product.controller.php';
         $controller = new ProductController($conn);
         $controller->getAllProducts();
         break;
 
     case '/admin/products/create':
-        require_once '../src/controllers/product.controller.php';
         $controller = new ProductController($conn);
         if ($method == 'GET') {
             $controller->create();
@@ -87,7 +85,6 @@ switch ($path) {
     default:
         // Xử lý route động cho trang edit
         if (preg_match('/^\/admin\/products\/edit\/(\d+)$/', $path, $matches)) {
-            require_once '../src/controllers/product.controller.php';
             $controller = new ProductController($conn);
             $productId = $matches[1]; // Lấy ra ID từ URL
 
@@ -107,12 +104,19 @@ switch ($path) {
 
         if (preg_match('/^\/admin\/products\/delete\/(\d+)$/', $path, $matches)) {
             if ($method == 'POST') {
-                require_once '../src/controllers/product.controller.php';
                 $controller = new ProductController($conn);
                 $productId = $matches[1];
                 $controller->delete($productId);
             }
             break;
+        }
+        //
+        if (preg_match('/^\/product\/(\d+)$/', $path, $matches)) {
+            require_once '../src/controllers/product.controller.php';
+            $controller = new ProductController($conn);
+            $productId = $matches[1];
+            $controller->showProductDetail($productId);
+            break; //
         }
         echo "404 - Trang không tồn tại";
         break;

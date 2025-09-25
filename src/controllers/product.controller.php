@@ -7,7 +7,7 @@ class ProductController
     {
         $this->productService = new ProductService($conn);
     }
-
+    //method admin
     public function create($errorMessage = '', $oldInput = [])
     {
         // Lấy danh sách categories để hiển thị trong form
@@ -39,11 +39,16 @@ class ProductController
         $products = $this->productService->getAllProducts();
         require_once __DIR__ . '/../views/admin/products/index.php';
     }
-    public function getEditPage($id)
+    public function getEditPage($id, $errorMessage = '', $oldInput = [])
     {
 
         $product = $this->productService->getProductById($id);
-
+        if (!$product) {
+            // Chuyển hướng hoặc hiển thị lỗi 404
+            http_response_code(404);
+            echo "Sản phẩm không tồn tại";
+            return;
+        }
         $categories = $this->productService->getAllCategories();
         $categoryIDs = $this->productService->getCategoryByProductId($id);
         require_once __DIR__ . '/../views/admin/products/edit.php';
@@ -61,6 +66,11 @@ class ProductController
 
             // Lấy lại dữ liệu giống hệt như trong hàm getEditPage()
             $product = $this->productService->getProductById($id);
+            if (!$product) {
+                http_response_code(404);
+                echo "Sản phẩm không tồn tại";
+                return;
+            }
             $categories = $this->productService->getAllCategories();
             $categoryIDs = $this->productService->getCategoryByProductId($id);
 
@@ -76,4 +86,25 @@ class ProductController
             exit();
         }
     }
+    //end
+    //method user
+    public function getAllProductsActive()
+    {
+        $products = $this->productService->getAllProductsActive();
+        $categories = $this->productService->getAllCategories();
+        require_once __DIR__ . '/../views/home/index.php';
+    }
+    public function showProductDetail($id)
+    {
+        $product = $this->productService->getProductById($id);
+        if (!$product) {
+            http_response_code(404);
+            // Có thể require_once một file view 404 đẹp hơn ở đây
+            echo "404 - Sản phẩm không tồn tại";
+            exit();
+        }
+        $categories = $this->productService->getAllCategories();
+        require_once __DIR__ . '/../views/home/detailProduct.php';
+    }
+    //end
 }

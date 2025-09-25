@@ -42,6 +42,25 @@ class AuthMiddleware
 
         return false;
     }
+    public function requireAdmin()
+    {
+        // 1. Start session nếu chưa có
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        // 2. Yêu cầu đăng nhập trước
+        $this->requireAuth();
+
+        // 3. Kiểm tra vai trò trong session
+        if (!isset($_SESSION['user']['role_id']) || $_SESSION['user']['role_id'] != 1) {
+            http_response_code(403);
+            echo "<h1>403 Forbidden</h1>";
+            echo "Bạn không có quyền truy cập vào trang này.";
+            exit();
+        }
+    }
+
     function requireAuth()
     {
         if (session_status() === PHP_SESSION_NONE) {
@@ -68,7 +87,11 @@ class AuthMiddleware
     function applyGlobalMiddleware($path)
     {
         $routes = require_once '../src/config/routes.php';
-
+        // Kiểm tra nếu là route admin
+        // strpos($path, '/admin') === 0 có nghĩa là "$path bắt đầu bằng '/admin'"
+        if (strpos($path, '/admin') === 0) {
+            $this->requireAdmin(); // Áp dụng chốt bảo vệ admin
+        }
         //  cần authentication
         if (in_array($path, $routes['protected'])) {
             $this->requireAuth();

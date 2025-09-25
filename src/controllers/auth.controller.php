@@ -40,7 +40,13 @@ class AuthController
         $password = trim($_POST['password']);
         $loginResult = $this->authService->login($email, $password);
         if ($loginResult->status == true) {
-            $_SESSION['user'] = $loginResult->user;
+            // lưu thông tin cần thiết
+            $_SESSION['user'] = [
+                'id' => $loginResult->user->id,
+                'fullname' => $loginResult->user->fullname,
+                'email' => $loginResult->user->email,
+                'role_id' => $loginResult->user->role_id
+            ];
             header('Location: /shoe-shop/public/');
             exit();
         } else {

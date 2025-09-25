@@ -1,6 +1,6 @@
 <?php
 $host = "localhost";
-$port = 3307;
+$port = 1133;
 $dbname = "shoe_shop_db";
 $username = "root";
 $password = "";
