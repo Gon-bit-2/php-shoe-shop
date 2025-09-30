@@ -26,7 +26,8 @@
                     <h2 class="text-xl font-semibold text-gray-700 mb-2">Mô tả sản phẩm</h2>
                     <p class="text-gray-600 leading-relaxed"><?= nl2br(htmlspecialchars($product->description)) ?></p>
                 </div>
-                <form action="#" method="POST">
+                <form action="/shoe-shop/public/cart/add" method="POST">
+                    <input type="hidden" name="product_id" value="<?= $product->id ?>">
                     <div class="flex items-center mb-6">
                         <label for="quantity" class="mr-4 text-gray-700 font-semibold">Số lượng:</label>
                         <input type="number" id="quantity" name="quantity" value="1" min="1" max="<?= $product->stock ?>" class="w-20 text-center border rounded-md py-2 px-3">

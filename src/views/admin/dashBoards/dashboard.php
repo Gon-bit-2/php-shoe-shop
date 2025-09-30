@@ -18,12 +18,12 @@
                 <p class="font-normal text-gray-700">Thêm, sửa, xóa và xem danh sách các sản phẩm.</p>
             </a>
 
-            <a href="#" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition">
+            <a href="/shoe-shop/public/admin/orders" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">Quản lý Đơn hàng</h5>
                 <p class="font-normal text-gray-700">Xem và cập nhật trạng thái các đơn hàng của khách.</p>
             </a>
 
-            <a href="#" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition">
+            <a href="/shoe-shop/public/admin/users" class="block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 transition">
                 <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900">Quản lý Người dùng</h5>
                 <p class="font-normal text-gray-700">Xem danh sách và quản lý tài khoản khách hàng.</p>
             </a>

@@ -5,6 +5,8 @@ require_once '../src/middleware/product.middleware.php';
 require_once '../src/controllers/product.controller.php';
 require_once '../src/controllers/auth.controller.php';
 require_once '../src/controllers/dashBoard.controller.php';
+require_once '../src/controllers/cart.controller.php';
+require_once '../src/controllers/order.controller.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -60,6 +62,7 @@ switch ($path) {
         $controller = new AuthController($conn);
         $controller->logout();
         break;
+    // admin
     case '/admin':
         $controller = new DashBoardController($conn);
         $controller->index();
@@ -80,6 +83,48 @@ switch ($path) {
                 exit();
             }
             $controller->store();
+        }
+        break;
+    case '/admin/orders':
+        $controller = new OrderController($conn);
+        $controller->getAllOrders();
+        break;
+    //
+    case '/cart':
+        $controller = new CartController($conn);
+        $controller->index();
+        break;
+    case '/cart/add':
+        if ($method == 'POST') {
+            $controller = new CartController($conn);
+            $controller->add();
+        }
+        break;
+    case '/cart/update':
+        if ($method == 'POST') {
+            $controller = new CartController($conn);
+            $controller->update();
+        }
+        break;
+    case '/cart/remove':
+        if ($method == 'POST') {
+            $controller = new CartController($conn);
+            $controller->remove();
+        }
+        break;
+    case '/cart/clear':
+        if ($method == 'POST') {
+            $controller = new CartController($conn);
+            $controller->clear();
+        }
+        break;
+    case '/checkout':
+        $authMiddleware->requireAuth(); // Bắt buộc đăng nhập để vào trang checkout
+        $controller = new OrderController($conn);
+        if ($method == 'GET') {
+            $controller->showCheckoutForm();
+        } elseif ($method == 'POST') {
+            $controller->placeOrder();
         }
         break;
     default:
