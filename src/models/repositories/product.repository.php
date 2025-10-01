@@ -88,9 +88,12 @@ class ProductRepository
             $stmt->bindParam(":is_active", $product->is_active);
             $stmt->bindParam(":updated_at", $product->updated_at);
             $stmt->execute();
+            //
+            // xóa các danh mục cũ
             $deleteQuery = "DELETE FROM product_category_map WHERE product_id = :product_id";
             $deleteStmt = $this->conn->prepare($deleteQuery);
             $deleteStmt->execute([':product_id' => $product->id]);
+            // thêm các danh mục mới
             if (!empty($categoryIDs)) {
                 $mapQuery = "INSERT INTO product_category_map (product_id,category_id) VALUES (:product_id,:category_id)";
                 $mapStmt = $this->conn->prepare($mapQuery);

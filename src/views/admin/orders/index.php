@@ -33,25 +33,25 @@
                         <?php foreach ($orders as $order): ?>
                             <tr>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap">#<?= htmlspecialchars($order['id']) ?></p>
+                                    <p class="text-gray-900 whitespace-no-wrap">#<?= htmlspecialchars($order->id) ?></p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap"><?= htmlspecialchars($order['customer_name']) ?></p>
+                                    <p class="text-gray-900 whitespace-no-wrap"><?= htmlspecialchars($order->customer_name) ?></p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 font-semibold whitespace-no-wrap"><?= number_format($order['total_amount']) ?> VNĐ</p>
+                                    <p class="text-gray-900 font-semibold whitespace-no-wrap"><?= number_format($order->total_amount) ?> VNĐ</p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                     <span class="relative inline-block px-3 py-1 font-semibold text-orange-900 leading-tight">
                                         <span aria-hidden class="absolute inset-0 bg-orange-200 opacity-50 rounded-full"></span>
-                                        <span class="relative"><?= htmlspecialchars(ucfirst($order['status'])) ?></span>
+                                        <span class="relative"><?= htmlspecialchars(ucfirst($order->status)) ?></span>
                                     </span>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <p class="text-gray-900 whitespace-no-wrap"><?= date('d/m/Y H:i', strtotime($order['created_at'])) ?></p>
+                                    <p class="text-gray-900 whitespace-no-wrap"><?= date('d/m/Y H:i', strtotime($order->created_at)) ?></p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-left">
-                                    <a href="/shoe-shop/public/admin/orders/view/<?= $order['id'] ?>" class="text-indigo-600 hover:text-indigo-900">Xem chi tiết</a>
+                                    <a href="/shoe-shop/public/admin/orders/view/<?= $order->id ?>" class="text-indigo-600 hover:text-indigo-900">Xem chi tiết</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

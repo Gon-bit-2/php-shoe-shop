@@ -128,7 +128,7 @@ switch ($path) {
         }
         break;
     default:
-        // Xử lý route động cho trang edit
+        // admin edit product
         if (preg_match('/^\/admin\/products\/edit\/(\d+)$/', $path, $matches)) {
             $controller = new ProductController($conn);
             $productId = $matches[1]; // Lấy ra ID từ URL
@@ -146,7 +146,7 @@ switch ($path) {
             }
             break;
         }
-
+        // admin delete product
         if (preg_match('/^\/admin\/products\/delete\/(\d+)$/', $path, $matches)) {
             if ($method == 'POST') {
                 $controller = new ProductController($conn);
@@ -155,7 +155,7 @@ switch ($path) {
             }
             break;
         }
-        //
+        // user detail product
         if (preg_match('/^\/product\/(\d+)$/', $path, $matches)) {
             require_once '../src/controllers/product.controller.php';
             $controller = new ProductController($conn);
@@ -163,6 +163,22 @@ switch ($path) {
             $controller->showProductDetail($productId);
             break; //
         }
+        //
+        if (preg_match('/^\/admin\/orders\/update-status\/(\d+)$/', $path, $matches) && $method == 'POST') {
+            $controller = new OrderController($conn);
+            $orderId = $matches[1];
+            $controller->updateStatus($orderId);
+            break;
+        }
+        // admin detail order
+        if (preg_match('/^\/admin\/orders\/view\/(\d+)$/', $path, $matches)) {
+            $controller = new OrderController($conn);
+            $orderId = $matches[1]; // Lấy ID từ URL
+            $controller->getOrderDetail($orderId);
+            break;
+        }
         echo "404 - Trang không tồn tại";
         break;
+        //
+
 }

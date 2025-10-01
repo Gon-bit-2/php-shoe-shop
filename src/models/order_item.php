@@ -1,0 +1,10 @@
+<?php
+class OrderItem
+{
+    public $id;
+    public $order_id;
+    public $product_id;
+    public $product_name;
+    public $quantity;
+    public $price;
+}

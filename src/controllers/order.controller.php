@@ -54,4 +54,31 @@ class OrderController
         $orders = $this->orderService->getAllOrders();
         require_once __DIR__ . '/../views/admin/orders/index.php';
     }
+    public function getOrderDetail($orderId)
+    {
+        $orderDetails = $this->orderService->getOrderDetail($orderId);
+
+        // Nếu không có dữ liệu
+        if (!$orderDetails) {
+            http_response_code(404);
+            echo "<h1>404 Not Found</h1><p>Đơn hàng không tồn tại.</p>";
+            exit();
+        }
+
+        // Nếu có dữ liệu, nạp view và truyền dữ liệu sang
+        require_once __DIR__ . '/../views/admin/orders/viewDetail.php';
+    }
+    public function updateStatus($id)
+    {
+        // Lấy trạng thái mới từ form POST
+        $newStatus = $_POST['status'] ?? '';
+
+        // Gọi service để thực hiện cập nhật
+        $result = $this->orderService->updateOrderStatus($id, $newStatus);
+
+        // Sau khi cập nhật, chuyển hướng admin quay lại chính trang chi tiết đơn hàng
+        // để họ thấy trạng thái đã được thay đổi
+        header('Location: /shoe-shop/public/admin/orders/view/' . $id);
+        exit();
+    }
 }

@@ -21,7 +21,7 @@ class OrderService
         $cartTotal = $this->cartService->getCartTotal();
 
         if (empty($cartItems)) {
-            return ['success' => false, 'message' => 'Giỏ hàng của bạn trống!'];
+            return (object)['status' => false, 'message' => 'Giỏ hàng của bạn trống!'];
         }
 
         try {
@@ -41,15 +41,41 @@ class OrderService
 
             $this->cartService->clearCart();
 
-            return ['success' => true, 'order_id' => $orderId];
+            return (object)['status' => true, 'order_id' => $orderId];
         } catch (Exception $e) {
             $this->conn->rollBack();
-            return ['success' => false, 'message' => $e->getMessage()];
+            return (object) ['status' => false, 'message' => $e->getMessage()];
         }
     }
     // admin quan ly
     public function getAllOrders()
     {
         return $this->orderRepository->findAll();
+    }
+
+    public function getOrderDetail($orderId)
+    {
+        $order = $this->orderRepository->findOrderById($orderId);
+        if (!$order) {
+            return (object)['status' => false, 'message' => 'Đơn hàng không tồn tại'];
+        }
+        // items
+        $items = $this->orderRepository->findItemsByOrderId($orderId);
+        if (!$items) {
+            return (object)['status' => false, 'message' => 'Đơn hàng không có sản phẩm'];
+        }
+        return (object)['status' => true, 'order' => $order, 'items' => $items];
+    }
+    public function updateOrderStatus($orderId, $newStatus)
+    {
+        $allowedStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+
+        // Kiểm tra xem trạng thái mới có nằm trong danh sách được phép hay không
+        if (!in_array($newStatus, $allowedStatuses)) {
+            return false;
+        }
+
+        // Nếu hợp lệ, gọi repository để cập nhật
+        return $this->orderRepository->updateStatus($orderId, $newStatus);
     }
 }
