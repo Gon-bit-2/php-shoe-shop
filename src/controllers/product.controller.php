@@ -12,25 +12,34 @@ class ProductController
     {
         // Lấy danh sách categories để hiển thị trong form
         $categories = $this->productService->getAllCategories();
-
+        // Lấy danh sách các giá trị cho Size và Màu sắc
+        $sizes = $this->productService->getAttributeValuesByName('Size');
+        $colors = $this->productService->getAttributeValuesByName('Màu sắc');
         // Nạp view, bây giờ các biến $errorMessage và $oldInput sẽ có sẵn cho view sử dụng
         require_once __DIR__ . '/../views/admin/products/create.php';
     }
 
     public function store($errorMessage = '', $oldInput = [])
     {
-        // Validation có thể được thêm ở đây sau
         $result = $this->productService->createProduct($_POST);
 
         if ($result) {
-            // Chuyển hướng về trang danh sách nếu thành công
             header('Location: /shoe-shop/public/admin/products');
             exit();
         } else {
             // Xử lý lỗi
             $categories = $this->productService->getAllCategories();
-            $errorMessage = $errorMessage ?? "Có lỗi xảy ra, vui lòng thử lại.";
-            $oldInput = $oldInput ?? $_POST;
+
+            // --- BẮT ĐẦU SỬA LỖI ---
+            // Lấy lại cả sizes và colors, giống hệt như trong hàm create()
+            $sizes = $this->productService->getAttributeValuesByName('Size');
+            $colors = $this->productService->getAttributeValuesByName('Màu sắc');
+            // --- KẾT THÚC SỬA LỖI ---
+
+            $errorMessage = $errorMessage ?: "Có lỗi xảy ra khi lưu sản phẩm, vui lòng thử lại.";
+            $oldInput = $oldInput ?: $_POST;
+
+            // Nạp lại view với đầy đủ dữ liệu
             require_once __DIR__ . '/../views/admin/products/create.php';
         }
     }
@@ -92,19 +101,43 @@ class ProductController
     {
         $products = $this->productService->getAllProductsActive();
         $categories = $this->productService->getAllCategories();
-        require_once __DIR__ . '/../views/home/index.php';
+        require_once __DIR__ . '/../views/home/products/index.php';
     }
     public function showProductDetail($id)
     {
-        $product = $this->productService->getProductById($id);
-        if (!$product) {
+        $data = $this->productService->getProductWithVariants($id);
+
+        if (!$data) {
             http_response_code(404);
-            // Có thể require_once một file view 404 đẹp hơn ở đây
             echo "404 - Sản phẩm không tồn tại";
             exit();
         }
+
+        // Gán dữ liệu vào các biến để view dễ sử dụng
+        $product = $data->product;
+        $variants = $data->variants;
+        $options = $data->options;
+
+        // Nạp view và truyền dữ liệu sang
+        // (Đổi tên file view nếu cần, ở đây tôi dùng lại file cũ)
+        require_once __DIR__ . '/../views/home/products/detailProduct.php';
+    }
+    public function showProductPage()
+    {
+        // Lấy các tham số từ URL (phương thức GET)
+        $filters = [
+            'search' => $_GET['search'] ?? '',
+            'category' => $_GET['category'] ?? null,
+            // --- THÊM DÒNG MỚI ---
+            'price' => $_GET['price'] ?? null // Thêm tham số price
+        ];
+
+        // Gọi service với các bộ lọc (không cần thay đổi gì thêm ở đây)
+        $products = $this->productService->getAllProductsActive($filters);
         $categories = $this->productService->getAllCategories();
-        require_once __DIR__ . '/../views/home/detailProduct.php';
+
+        // Nạp view
+        require_once __DIR__ . '/../views/home/products/filterPage.php';
     }
     //end
 }

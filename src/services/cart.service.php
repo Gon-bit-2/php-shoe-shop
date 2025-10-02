@@ -9,8 +9,11 @@ class CartService
     {
         $this->productRepository = new ProductRepository($conn);
     }
-
-    public function addToCart($productId, $quantity)
+    public function getVariantDetails($variantId)
+    {
+        return $this->productRepository->getVariantDetails($variantId);
+    }
+    public function addToCart($productId, $quantity, $variantId)
     {
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
@@ -22,34 +25,29 @@ class CartService
         }
 
         // Lấy thông tin sản phẩm từ Repository
-        $product = $this->productRepository->findById($productId);
+        $variant = $this->getVariantDetails($variantId);
 
-        // Kiểm tra sản phẩm và số lượng tồn kho
-        if (!$product || $product->stock < $quantity) {
-            // (Tùy chọn: Lưu thông báo lỗi vào session để hiển thị cho người dùng)
+        if (!$variant || $variant->stock < $quantity) {
             $_SESSION['error_message'] = 'Sản phẩm không tồn tại hoặc không đủ hàng!';
             header('Location: ' . $_SERVER['HTTP_REFERER']);
             exit();
         }
 
-        // Logic thêm/cập nhật sản phẩm vào giỏ hàng
-        if (isset($_SESSION['cart'][$productId])) {
-            $_SESSION['cart'][$productId]['quantity'] += $quantity;
+        // Key của giỏ hàng giờ là variant_id
+        if (isset($_SESSION['cart'][$variantId])) {
+            $_SESSION['cart'][$variantId]['quantity'] += $quantity;
         } else {
-            $_SESSION['cart'][$productId] = [
-                'id' => $product->id, // Lưu lại ID để dễ truy xuất
-                'name' => $product->name,
-                'price' => $product->price,
-                'image_url' => $product->image_url,
+            $_SESSION['cart'][$variantId] = [
+                'id' => $variant->id,
+                'name' => $variant->product_name, // Tên sản phẩm chính
+                // TODO: Thêm tên thuộc tính (VD: Size 40, Màu Đen)
+                'price' => $variant->price,
+                'image_url' => $variant->image_url,
                 'quantity' => $quantity
             ];
         }
 
-
-        // Lưu thông báo thành công vào session
-        $_SESSION['success_message'] = 'Đã thêm sản phẩm vào giỏ hàng thành công!';
-
-        // Quay lại trang trước đó (trang chi tiết sản phẩm)
+        $_SESSION['success_message'] = 'Đã thêm sản phẩm vào giỏ hàng!';
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit();
     }
@@ -69,12 +67,14 @@ class CartService
 
         return $total;
     }
+
     public function updateCartItem($productId, $quantity)
     {
         $cartItems = $this->getCartItems();
         $cartItems[$productId]['quantity'] = $quantity;
         $_SESSION['cart'] = $cartItems;
     }
+
     public function removeCartItem($productId)
     {
         $cartItems = $this->getCartItems();

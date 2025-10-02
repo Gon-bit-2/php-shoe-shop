@@ -25,5 +25,6 @@
 
   // Additional PHP formatting settings
   "php.suggest.basic": false,
-  "php.validate.enable": false
+  "php.validate.enable": false,
+  "cSpell.words": ["thức"]
 }

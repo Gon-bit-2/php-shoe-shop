@@ -90,6 +90,12 @@ switch ($path) {
         $controller->getAllOrders();
         break;
     //
+    case '/products':
+        $controller = new ProductController($conn);
+        // Gọi đến hàm hiển thị trang lọc sản phẩm
+        $controller->showProductPage();
+        break;
+    //
     case '/cart':
         $controller = new CartController($conn);
         $controller->index();
@@ -126,6 +132,13 @@ switch ($path) {
         } elseif ($method == 'POST') {
             $controller->placeOrder();
         }
+        break;
+    case '/history':
+        // Middleware sẽ tự động kiểm tra đăng nhập vì route này nằm trong
+        // mảng 'protected' của file routes.php (nếu bạn đã cấu hình)
+        // Hoặc bạn có thể gọi trực tiếp: $authMiddleware->requireAuth();
+        $controller = new OrderController($conn);
+        $controller->showPurchaseHistory();
         break;
     default:
         // admin edit product

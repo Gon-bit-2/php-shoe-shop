@@ -5,6 +5,9 @@
             <a href="/shoe-shop/public/" class="text-gray-600 hover:text-indigo-600">Trang Chủ</a>
             <a href="#" class="text-gray-600 hover:text-indigo-600">Sản Phẩm</a>
             <a href="#" class="text-gray-600 hover:text-indigo-600">Giới Thiệu</a>
+            <form action="/shoe-shop/public/products" method="GET" class="relative">
+                <input type="search" name="search" placeholder="Tìm kiếm sản phẩm..." class="py-2 px-4 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">
+            </form>
         </nav>
         <div class="flex items-center space-x-4">
             <a href="/shoe-shop/public/cart" class="text-gray-600 hover:text-indigo-600">
@@ -29,7 +32,7 @@
                         <div class="border-t border-gray-100"></div>
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Thông tin người dùng</a>
                         <a href="/shoe-shop/public/cart" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Giỏ hàng</a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Lịch sử mua hàng</a>
+                        <a href="/shoe-shop/public/history" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Lịch sử mua hàng</a>
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Đổi mật khẩu</a>
                         <div class="border-t border-gray-100"></div>
                         <a href="/shoe-shop/public/logout" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100" role="menuitem">Đăng xuất</a>

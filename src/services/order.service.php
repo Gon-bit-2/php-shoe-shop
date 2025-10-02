@@ -78,4 +78,9 @@ class OrderService
         // Nếu hợp lệ, gọi repository để cập nhật
         return $this->orderRepository->updateStatus($orderId, $newStatus);
     }
+    //
+    public function getOrdersByUserId($userId)
+    {
+        return $this->orderRepository->findOrdersByUserId($userId);
+    }
 }

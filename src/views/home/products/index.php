@@ -9,7 +9,7 @@
 
 <body class="bg-white">
 
-    <?php require_once __DIR__ . '/../layout/header.php'; ?>
+    <?php require_once __DIR__ . '/../../layout/header.php'; ?>
 
     <main>
         <section class="relative bg-gray-900 text-white">
@@ -72,7 +72,7 @@
         </section>
     </main>
 
-    <?php require_once __DIR__ . '/../layout/footer.php'; ?>
+    <?php require_once __DIR__ . '/../../layout/footer.php'; ?>
 
 </body>
 

@@ -81,4 +81,16 @@ class OrderController
         header('Location: /shoe-shop/public/admin/orders/view/' . $id);
         exit();
     }
+    //
+    public function showPurchaseHistory()
+    {
+        // Lấy ID người dùng từ session đã đăng nhập
+        $userId = $_SESSION['user']['id'];
+
+        // Gọi service để lấy danh sách đơn hàng của người dùng đó
+        $orders = $this->orderService->getOrdersByUserId($userId);
+
+        // Nạp view để hiển thị
+        require_once __DIR__ . '/../views/home/history/index.php';
+    }
 }

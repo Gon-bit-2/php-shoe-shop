@@ -89,4 +89,17 @@ class OrderRepository
         $stmt->bindParam(":id", $orderId);
         $stmt->execute();
     }
+    //for u
+    public function findOrdersByUserId($userId)
+    {
+        // Câu lệnh này tương tự findAll, nhưng có thêm điều kiện WHERE
+        $query = "SELECT * FROM orders
+              WHERE user_id = :user_id
+              ORDER BY created_at DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':user_id' => $userId]);
+        // Chúng ta vẫn dùng FETCH_CLASS để nhận về một mảng các đối tượng Order
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Order');
+    }
 }

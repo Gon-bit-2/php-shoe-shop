@@ -13,5 +13,6 @@ return [
         '/dashboard',
         '/profile',
         '/orders',
+        'history'
     ]
 ];

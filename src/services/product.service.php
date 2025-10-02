@@ -16,22 +16,33 @@ class ProductService
     }
     public function createProduct($data)
     {
+        // Xử lý ảnh upload (giữ nguyên)
+        $imageUrl = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $imageUrl = $this->handleImageUpload($_FILES['image']);
         }
-        $categoryIDs = $data['categories'] ?? [];
-        $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
+
+        // Lấy thông tin sản phẩm chính
         $product = new Product();
         $product->name = $data['name'];
-        $product->slug = $slug;
+        $product->slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
         $product->description = $data['description'];
-        $product->price = $data['price'];
         $product->image_url = $imageUrl;
-        $product->stock = $data['stock'];
         $product->is_active = isset($data['is_active']) ? 1 : 0;
-        $product->created_at = date('Y-m-d H:i:s');
-        $product->updated_at = date('Y-m-d H:i:s');
-        return $this->productRepository->save($product, $categoryIDs);
+
+        // Lấy thông tin danh mục và các biến thể
+        $categoryIDs = $data['categories'] ?? [];
+        $variantsData = $data['variants'] ?? [];
+
+        // Kiểm tra xem có ít nhất một biến thể không
+        if (empty($variantsData)) {
+            // Trả về lỗi nếu không có biến thể nào được thêm
+            // Bạn có thể xử lý lỗi này ở Controller
+            return false;
+        }
+
+        // Gọi đến Repository để lưu tất cả dữ liệu
+        return $this->productRepository->save($product, $categoryIDs, $variantsData);
     }
     function getAllProducts()
     {
@@ -44,6 +55,55 @@ class ProductService
     function getCategoryByProductId($productId)
     {
         return $this->productRepository->findCategoryByProductId($productId);
+    }
+    public function getAttributeValuesByName($name)
+    {
+        return $this->productRepository->findAttributeValuesByName($name);
+    }
+    public function getProductWithVariants($productId)
+    {
+        // Lấy thông tin sản phẩm chính
+        $product = $this->productRepository->findById($productId);
+        if (!$product) {
+            return null;
+        }
+
+        // Lấy dữ liệu thô của các biến thể
+        $variantsRaw = $this->productRepository->findVariantsByProductId($productId);
+
+        // Xử lý dữ liệu thô thành một cấu trúc có tổ chức
+        $variants = [];
+        $options = []; // Mảng để lưu các lựa chọn Size, Màu có sẵn
+        foreach ($variantsRaw as $row) {
+            $variantId = $row->id;
+
+            // Gán thông tin chung cho biến thể
+            if (!isset($variants[$variantId])) {
+                $variants[$variantId] = [
+                    'id' => $variantId,
+                    'price' => $row->price,
+                    'stock' => $row->stock,
+                    'attributes' => []
+                ];
+            }
+
+            // Thêm thuộc tính (Size, Màu) vào biến thể
+            $variants[$variantId]['attributes'][$row->attribute_name] = $row->attribute_value;
+
+            // Thêm giá trị thuộc tính vào danh sách các lựa chọn
+            if (!isset($options[$row->attribute_name])) {
+                $options[$row->attribute_name] = [];
+            }
+            if (!in_array($row->attribute_value, $options[$row->attribute_name])) {
+                $options[$row->attribute_name][] = $row->attribute_value;
+            }
+        }
+
+        return (object)[
+            'product' => $product,
+            'variants' => array_values($variants), // Chuyển về mảng tuần tự
+            'options' => $options // Ví dụ: ['Size' => ['40', '41'], 'Màu sắc' => ['Đen', 'Trắng']]
+        ];
     }
     function updateProduct($id, $data)
     {
@@ -120,8 +180,9 @@ class ProductService
     {
         return $this->productRepository->delete($id);
     }
-    function getAllProductsActive()
+    public function getAllProductsActive($filters = [])
     {
-        return $this->productRepository->findAllProductActive();
+        // Chỉ đơn giản là truyền các bộ lọc xuống cho Repository
+        return $this->productRepository->findWithFilters($filters);
     }
 }

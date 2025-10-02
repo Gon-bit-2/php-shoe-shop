@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/../product.php';
+require_once __DIR__ . '/../productVariant.php';
+require_once __DIR__ . '/../attribute.php';
 class ProductRepository
 {
     private $conn;
@@ -8,40 +10,113 @@ class ProductRepository
         $this->conn = $conn;
     }
 
-    public function save(Product $product, array $categoryIDs)
+    public function save(Product $product, array $categoryIDs, array $variantsData)
     {
         try {
             $this->conn->beginTransaction();
-            // Chỉ INSERT vào các cột có dữ liệu từ form create
-            $query = "INSERT INTO products (name, slug, description, price, image_url, stock, is_active)
-                  VALUES (:name, :slug, :description, :price, :image_url, :stock, :is_active)";
 
+            // Bước 1: Lưu sản phẩm chính (không có price và stock nữa)
+            $query = "INSERT INTO products (name, slug, description, image_url, is_active)
+              VALUES (:name, :slug, :description, :image_url, :is_active)";
             $stmt = $this->conn->prepare($query);
+            $stmt->execute([
+                ':name' => $product->name,
+                ':slug' => $product->slug,
+                ':description' => $product->description,
+                ':image_url' => $product->image_url,
+                ':is_active' => $product->is_active
+            ]);
+            $productId = $this->conn->lastInsertId();
 
-            $stmt->bindParam(":name", $product->name);
-            $stmt->bindParam(":slug", $product->slug);
-            $stmt->bindParam(":description", $product->description);
-            $stmt->bindParam(":price", $product->price);
-            $stmt->bindParam(":image_url", $product->image_url);
-            $stmt->bindParam(":stock", $product->stock);
-            $stmt->bindParam(":is_active", $product->is_active);
-
-            $stmt->execute();
-            $productID = $this->conn->lastInsertId();
-
+            // Bước 2: Xử lý danh mục
             if (!empty($categoryIDs)) {
-                $mapQuery = "INSERT INTO product_category_map (product_id, category_id) VALUES (:product_id, :category_id)";
+                // Chuẩn bị câu lệnh MỘT LẦN bên ngoài vòng lặp
+                $mapQuery = "INSERT INTO product_category_map (product_id, category_id) VALUES (?, ?)";
                 $mapStmt = $this->conn->prepare($mapQuery);
                 foreach ($categoryIDs as $categoryID) {
-                    $mapStmt->execute([':product_id' => $productID, ':category_id' => $categoryID]);
+                    // Thực thi nhiều lần với dữ liệu khác nhau
+                    $mapStmt->execute([$productId, $categoryID]);
                 }
             }
+
+            // Bước 3: Xử lý các biến thể
+            // Chuẩn bị các câu lệnh MỘT LẦN bên ngoài vòng lặp
+            $variantQuery = "INSERT INTO product_variants (product_id, price, stock) VALUES (?, ?, ?)";
+            $variantStmt = $this->conn->prepare($variantQuery);
+
+            $vvQuery = "INSERT INTO variant_values (variant_id, attribute_value_id) VALUES (?, ?)";
+            $vvStmt = $this->conn->prepare($vvQuery);
+
+            foreach ($variantsData as $variant) {
+                // 3.1. Tạo dòng trong `product_variants`
+                $variantStmt->execute([
+                    $productId,
+                    $variant['price'],
+                    $variant['stock']
+                ]);
+                $variantId = $this->conn->lastInsertId();
+
+                // 3.2. Lấy ID của giá trị thuộc tính (Size và Màu)
+                $sizeValueId = $this->findOrCreateAttributeValue(1, $variant['size']); // Giả định ID 'Size' là 1
+                $colorValueId = $this->findOrCreateAttributeValue(2, $variant['color']); // Giả định ID 'Màu sắc' là 2
+
+                // 3.3. Tạo liên kết trong `variant_values` (thực thi 2 lần)
+                $vvStmt->execute([$variantId, $sizeValueId]);
+                $vvStmt->execute([$variantId, $colorValueId]);
+            }
+
             $this->conn->commit();
-            return $productID;
+            return $productId;
         } catch (Exception $e) {
             $this->conn->rollBack();
+            // Ghi lại lỗi chi tiết vào error log của server để dễ debug sau này
+            error_log("Lỗi khi lưu sản phẩm: " . $e->getMessage());
             return false;
         }
+    }
+
+    public function findOrCreateAttributeValue($attributeId, $value)
+    {
+        // Thử tìm giá trị thuộc tính đã tồn tại
+        $query = "SELECT id FROM attribute_values WHERE attribute_id = :attribute_id AND `value` = :value";
+        $stmt = $this->conn->prepare($query);
+        // Sử dụng execute với mảng để an toàn và nhất quán
+        $stmt->execute([
+            ':attribute_id' => $attributeId,
+            ':value' => $value
+        ]);
+        $result = $stmt->fetchColumn();
+
+        if ($result) {
+            // Nếu đã có, trả về ID
+            return $result;
+        } else {
+            // Nếu chưa có, tạo mới và trả về ID
+            $insertQuery = "INSERT INTO attribute_values (attribute_id, `value`) VALUES (:attribute_id, :value)";
+            $insertStmt = $this->conn->prepare($insertQuery);
+            // Sử dụng execute với mảng
+            $insertStmt->execute([
+                ':attribute_id' => $attributeId,
+                ':value' => $value
+            ]);
+            return $this->conn->lastInsertId();
+        }
+    }
+
+    // ---- CÁC HÀM KHÁC (save, findAll,...) GIỮ NGUYÊN ----
+    // ...
+    public function findAttributeValuesByName($attributeName)
+    {
+        // Câu lệnh này JOIN 2 bảng attributes và attribute_values
+        // để tìm tất cả `value` thuộc về một `name` cụ thể
+        $query = "SELECT av.id, av.value
+              FROM attribute_values av
+              JOIN attributes a ON av.attribute_id = a.id
+              WHERE a.name = :attribute_name";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":attribute_name", $attributeName);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'AttributeValue'); // Lấy về mảng các giá trị
     }
     function findAll()
     {
@@ -72,6 +147,38 @@ class ProductRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
+    public function findVariantsByProductId($productId)
+    {
+        // Đây là một câu lệnh SQL phức tạp để lấy tất cả thông tin cần thiết trong một lần truy vấn
+        $query = "SELECT
+                pv.id, pv.price, pv.stock,
+                a.name AS attribute_name,
+                av.value AS attribute_value
+              FROM product_variants pv
+              JOIN variant_values vv ON pv.id = vv.variant_id
+              JOIN attribute_values av ON vv.attribute_value_id = av.id
+              JOIN attributes a ON av.attribute_id = a.id
+              WHERE pv.product_id = :product_id
+              ORDER BY pv.id, a.name";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":product_id", $productId);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'ProductVariant');
+    }
+    function getVariantDetails($variantId)
+    {
+        // (Đây là một cách làm đơn giản, có thể tối ưu bằng cách tạo hàm riêng trong Repository)
+        $query = "SELECT
+                    pv.id, pv.price, pv.stock, p.name AS product_name, p.image_url
+                  FROM product_variants pv
+                  JOIN products p ON pv.product_id = p.id
+                  WHERE pv.id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $variantId);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_CLASS, 'ProductVariant');
+    }
     function update(Product $product, array $categoryIDs)
     {
         try {
@@ -92,13 +199,16 @@ class ProductRepository
             // xóa các danh mục cũ
             $deleteQuery = "DELETE FROM product_category_map WHERE product_id = :product_id";
             $deleteStmt = $this->conn->prepare($deleteQuery);
-            $deleteStmt->execute([':product_id' => $product->id]);
+            $deleteStmt->bindParam(":product_id", $product->id);
+            $deleteStmt->execute();
             // thêm các danh mục mới
             if (!empty($categoryIDs)) {
                 $mapQuery = "INSERT INTO product_category_map (product_id,category_id) VALUES (:product_id,:category_id)";
                 $mapStmt = $this->conn->prepare($mapQuery);
                 foreach ($categoryIDs as $categoryID) {
-                    $mapStmt->execute([':product_id' => $product->id, ':category_id' => $categoryID]);
+                    $mapStmt->bindParam(":product_id", $product->id);
+                    $mapStmt->bindParam(":category_id", $categoryID);
+                    $mapStmt->execute();
                 }
             }
             $this->conn->commit();
@@ -107,6 +217,61 @@ class ProductRepository
             $this->conn->rollBack();
             return false;
         }
+    }
+
+    // Phương thức mới để tìm kiếm và lọc
+    public function findWithFilters($filters = [])
+    {
+        // Lấy các giá trị lọc ra
+        $searchTerm = $filters['search'] ?? '';
+        $categoryId = $filters['category'] ?? null;
+        // --- THÊM DÒNG MỚI ---
+        $priceRange = $filters['price'] ?? null; // price sẽ có dạng "min-max"
+
+        // ... (code xây dựng query và params như cũ) ...
+        $query = "SELECT p.*, GROUP_CONCAT(c.name SEPARATOR ', ') as category_names
+              FROM products p
+              LEFT JOIN product_category_map pcm ON p.id = pcm.product_id
+              LEFT JOIN categories c ON pcm.category_id = c.id
+              WHERE p.is_active = 1";
+        $params = [];
+
+        // Nếu có từ khóa tìm kiếm, thêm điều kiện vào câu lệnh WHERE
+        if (!empty($searchTerm)) {
+            $query .= " AND p.name LIKE :search";
+            $params[':search'] = '%' . $searchTerm . '%';
+        }
+        // Nếu có lọc theo danh mục, thêm điều kiện vào câu lệnh WHERE
+        if (!empty($categoryId)) {
+            $query .= " AND p.id IN (SELECT product_id FROM product_category_map WHERE category_id = :category_id)";
+            $params[':category_id'] = $categoryId;
+        }
+
+
+        //  LỌC GIÁ
+        if (!empty($priceRange)) {
+            // Tách chuỗi "min-max" thành 2 biến
+            $priceParts = explode('-', $priceRange);
+            $minPrice = $priceParts[0] ?? 0;
+            $maxPrice = $priceParts[1] ?? null;
+
+            if (is_numeric($minPrice)) {
+                $query .= " AND p.price >= :min_price";
+                $params[':min_price'] = $minPrice;
+            }
+
+            if (is_numeric($maxPrice)) {
+                $query .= " AND p.price <= :max_price";
+                $params[':max_price'] = $maxPrice;
+            }
+        }
+        //
+
+        $query .= " GROUP BY p.id ORDER BY p.created_at DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
     }
     public function delete($id)
     {
