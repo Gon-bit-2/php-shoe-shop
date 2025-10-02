@@ -50,16 +50,27 @@ class ProductController
     }
     public function getEditPage($id, $errorMessage = '', $oldInput = [])
     {
-
-        $product = $this->productService->getProductById($id);
-        if (!$product) {
-            // Chuyển hướng hoặc hiển thị lỗi 404
+        // Lấy thông tin sản phẩm và các biến thể của nó
+        $data = $this->productService->getProductWithVariants($id);
+        if (!$data) {
             http_response_code(404);
             echo "Sản phẩm không tồn tại";
             return;
         }
+
+        // Gán dữ liệu vào các biến để view dễ sử dụng
+        $product = $data->product;
+        $variants = $data->variants;
+
+        // Lấy tất cả các lựa chọn có thể có để hiển thị checkbox
         $categories = $this->productService->getAllCategories();
+        $sizes = $this->productService->getAttributeValuesByName('Size');
+        $colors = $this->productService->getAttributeValuesByName('Màu sắc');
+
+        // Lấy các danh mục mà sản phẩm này đang thuộc về
         $categoryIDs = $this->productService->getCategoryByProductId($id);
+
+        // Nạp view
         require_once __DIR__ . '/../views/admin/products/edit.php';
     }
     public function update($id, $data)

@@ -15,36 +15,36 @@ class OrderService
         $this->cartService = new CartService($conn);
     }
 
-    public function createOrder($userId, $customerName, $customerPhone, $customerAddress)
+    public function createOrder($userId, $customerName, $customerPhone, $customerAddress, $paymentMethod)
     {
         $cartItems = $this->cartService->getCartItems();
         $cartTotal = $this->cartService->getCartTotal();
 
         if (empty($cartItems)) {
-            return (object)['status' => false, 'message' => 'Giỏ hàng của bạn trống!'];
+            return ['success' => false, 'message' => 'Giỏ hàng của bạn trống!'];
         }
 
         try {
             $this->conn->beginTransaction();
 
-            $orderId = $this->orderRepository->createOrderRecord($userId, $customerName, $customerPhone, $customerAddress, $cartTotal);
+            // Truyền thêm $paymentMethod vào hàm
+            $orderId = $this->orderRepository->createOrderRecord($userId, $customerName, $customerPhone, $customerAddress, $cartTotal, $paymentMethod);
             if (!$orderId) {
                 throw new Exception("Không thể tạo đơn hàng.");
             }
 
-            foreach ($cartItems as $productId => $item) {
-                $this->orderRepository->updateProductStock($productId, $item['quantity']);
-                $this->orderRepository->createOrderItemRecord($orderId, $productId, $item);
+            foreach ($cartItems as $variantId => $item) {
+                $this->orderRepository->updateVariantStock($variantId, $item->quantity);
+                $this->orderRepository->createOrderItemRecord($orderId, $variantId, $item);
             }
 
             $this->conn->commit();
-
             $this->cartService->clearCart();
 
-            return (object)['status' => true, 'order_id' => $orderId];
+            return ['success' => true, 'order_id' => $orderId];
         } catch (Exception $e) {
             $this->conn->rollBack();
-            return (object) ['status' => false, 'message' => $e->getMessage()];
+            return ['success' => false, 'message' => $e->getMessage()];
         }
     }
     // admin quan ly

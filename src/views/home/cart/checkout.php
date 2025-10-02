@@ -43,6 +43,19 @@
                             <label for="customer_address" class="block text-gray-700 font-medium mb-2">Địa chỉ nhận hàng</label>
                             <textarea id="customer_address" name="customer_address" rows="3" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required></textarea>
                         </div>
+                        <div class="mt-6 mb-6">
+                            <label class="block text-gray-700 font-medium mb-2">Phương thức thanh toán</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="payment_method" value="cod" class="mr-3 h-4 w-4" checked>
+                                    <span>Thanh toán khi nhận hàng (COD)</span>
+                                </label>
+                                <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="payment_method" value="bank_transfer" class="mr-3 h-4 w-4">
+                                    <span>Chuyển khoản MoMo / Ngân hàng</span>
+                                </label>
+                            </div>
+                        </div>
                         <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
                             Xác nhận và Đặt hàng
                         </button>
@@ -55,13 +68,14 @@
                         <?php foreach ($cartItems as $item): ?>
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center">
-                                    <img src="/shoe-shop/public<?= htmlspecialchars($item['image_url']) ?>" alt="<?= htmlspecialchars($item['name']) ?>" class="w-16 h-16 object-cover rounded-md">
+                                    <img src="/shoe-shop/public<?= htmlspecialchars($item->image_url) ?>" alt="<?= htmlspecialchars($item->product_name) ?>" class="w-16 h-16 object-cover rounded-md">
                                     <div class="ml-4">
-                                        <p class="font-bold"><?= htmlspecialchars($item['name']) ?></p>
-                                        <p class="text-sm text-gray-600">Số lượng: <?= $item['quantity'] ?></p>
+                                        <p class="font-bold"><?= htmlspecialchars($item->product_name) ?></p>
+                                        <p class="text-sm text-gray-500"><?= htmlspecialchars($item->attributes) ?></p>
+                                        <p class="text-sm text-gray-600">Số lượng: <?= $item->quantity ?></p>
                                     </div>
                                 </div>
-                                <span class="font-medium"><?= number_format($item['price'] * $item['quantity']) ?> VNĐ</span>
+                                <span class="font-medium"><?= number_format($item->price * $item->quantity) ?> VNĐ</span>
                             </div>
                         <?php endforeach; ?>
                         <div class="border-t mt-4 pt-4">

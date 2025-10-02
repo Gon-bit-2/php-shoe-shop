@@ -9,48 +9,49 @@ class OrderRepository
     {
         $this->conn = $conn;
     }
-    public function createOrderRecord($userId, $name, $phone, $address, $total)
+    public function createOrderRecord($userId, $name, $phone, $address, $total, $paymentMethod)
     {
-        $query = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_address, total_amount)
-                  VALUES (:user_id, :name, :phone, :address, :total)";
+        $query = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_address, total_amount, payment_method)
+              VALUES (:user_id, :name, :phone, :address, :total, :payment_method)";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":user_id", $userId);
-        $stmt->bindParam(":name", $name);
-        $stmt->bindParam(":phone", $phone);
-        $stmt->bindParam(":address", $address);
-        $stmt->bindParam(":total", $total);
-        $stmt->execute();
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':name' => $name,
+            ':phone' => $phone,
+            ':address' => $address,
+            ':total' => $total,
+            ':payment_method' => $paymentMethod
+        ]);
         return $this->conn->lastInsertId();
     }
-    public function createOrderItemRecord($orderId, $productId, $item)
+    public function createOrderItemRecord($orderId, $variantId, $item)
     {
-        $query = "INSERT INTO order_items (order_id, product_id, product_name, quantity, price)
-                  VALUES (:order_id, :product_id, :product_name, :quantity, :price)";
+        $query = "INSERT INTO order_items (order_id, variant_id, product_name, variant_attributes, quantity, price)
+              VALUES (:order_id, :variant_id, :product_name, :variant_attributes, :quantity, :price)";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":order_id", $orderId);
-        $stmt->bindParam(":product_id", $productId);
-        $stmt->bindParam(":product_name", $item['name']);
-        $stmt->bindParam(":quantity", $item['quantity']);
-        $stmt->bindParam(":price", $item['price']);
-        $stmt->execute();
+        $stmt->execute([
+            ':order_id' => $orderId,
+            ':variant_id' => $variantId,
+            ':product_name' => $item->product_name,
+            ':variant_attributes' => $item->attributes,
+            ':quantity' => $item->quantity,
+            ':price' => $item->price
+        ]);
     }
 
-    public function updateProductStock($productId, $quantitySold)
+    public function updateVariantStock($variantId, $quantitySold)
     {
-        $checkStmt = $this->conn->prepare("SELECT name, stock FROM products WHERE id = :id FOR UPDATE");
-        $checkStmt->bindParam(":id", $productId);
-        $checkStmt->execute();
-        $product = $checkStmt->fetch(PDO::FETCH_CLASS, 'Product');
+        $checkStmt = $this->conn->prepare("SELECT stock FROM product_variants WHERE id = :id FOR UPDATE");
+        $checkStmt->execute([':id' => $variantId]);
+        $currentStock = $checkStmt->fetchColumn();
 
-        if (!$product || $product->stock < $quantitySold) {
-            throw new Exception("Sản phẩm '" . htmlspecialchars($product->name ?? 'Không rõ') . "' không đủ số lượng trong kho.");
+        if ($currentStock === false || $currentStock < $quantitySold) {
+            throw new Exception("Một sản phẩm trong giỏ hàng không đủ số lượng.");
         }
 
-        $query = "UPDATE products SET stock = stock - :quantity WHERE id = :id";
+        $query = "UPDATE product_variants SET stock = stock - :quantity WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":quantity", $quantitySold);
-        $stmt->bindParam(":id", $productId);
-        $stmt->execute();
+        $stmt->execute([':quantity' => $quantitySold, ':id' => $variantId]);
     }
     public function findAll()
     {

@@ -105,45 +105,39 @@ class ProductService
             'options' => $options // Ví dụ: ['Size' => ['40', '41'], 'Màu sắc' => ['Đen', 'Trắng']]
         ];
     }
-    function updateProduct($id, $data)
+    public function updateProduct($id, $data)
     {
         $product = $this->productRepository->findById($id);
         if (!$product) {
             return false;
         }
 
-        // Mặc định, giữ lại ảnh cũ
+        // Xử lý ảnh
         $imageUrl = $product->image_url;
-        $oldImagePath = $product->image_url;
-        // Nếu có ảnh mới được upload, thì xử lý và cập nhật lại $imageUrl
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            // (TODO: Bạn có thể thêm logic xóa file ảnh cũ ở đây nếu cần)
-            $imageUrl = $this->handleImageUpload($_FILES['image']);
-            // Nếu upload ảnh mới thành công VÀ có ảnh cũ tồn tại
-            if ($imageUrl && !empty($oldImagePath)) {
-                // Tạo đường dẫn vật lý đầy đủ đến file ảnh cũ
-                $fullOldPath = __DIR__ . '/../../public' . $oldImagePath;
-
-                // Kiểm tra xem file có thật sự tồn tại không trước khi xóa
-                if (file_exists($fullOldPath)) {
-                    unlink($fullOldPath); // Xóa file
+            $newImageUrl = $this->handleImageUpload($_FILES['image']);
+            if ($newImageUrl) {
+                // Xóa ảnh cũ nếu có
+                if ($product->image_url && file_exists(__DIR__ . '/../../public' . $product->image_url)) {
+                    unlink(__DIR__ . '/../../public' . $product->image_url);
                 }
+                $imageUrl = $newImageUrl;
             }
         }
 
-        // Cập nhật các thuộc tính
+        // Cập nhật thông tin sản phẩm chính
         $product->name = $data['name'];
-        $product->description = $data['description'];
-        $product->price = $data['price'];
-        $product->image_url = $imageUrl; // Gán đường dẫn ảnh mới hoặc giữ lại ảnh cũ
-        $product->stock = $data['stock'];
-        $product->is_active = isset($data['is_active']) ? 1 : 0;
         $product->slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
-        $product->updated_at = date('Y-m-d H:i:s');
+        $product->description = $data['description'];
+        $product->image_url = $imageUrl;
+        $product->is_active = isset($data['is_active']) ? 1 : 0;
 
+        // Lấy thông tin danh mục và biến thể từ form
         $categoryIDs = $data['categories'] ?? [];
+        $variantsData = $data['variants'] ?? [];
 
-        return $this->productRepository->update($product, $categoryIDs);
+        // Gọi đến Repository để thực hiện cập nhật phức tạp
+        return $this->productRepository->update($product, $categoryIDs, $variantsData);
     }
 
     function handleImageUpload($file)

@@ -31,17 +31,21 @@ class OrderController
         $customerName = trim($_POST['customer_name'] ?? '');
         $customerPhone = trim($_POST['customer_phone'] ?? '');
         $customerAddress = trim($_POST['customer_address'] ?? '');
+        // Lấy phương thức thanh toán từ POST
+        $paymentMethod = $_POST['payment_method'] ?? 'cod';
 
         if (empty($customerName) || empty($customerPhone) || empty($customerAddress)) {
             $this->showCheckoutForm("Vui lòng nhập đầy đủ thông tin giao hàng!");
             return;
         }
 
-        $result = $this->orderService->createOrder($userId, $customerName, $customerPhone, $customerAddress);
+        // Truyền thêm $paymentMethod vào service
+        $result = $this->orderService->createOrder($userId, $customerName, $customerPhone, $customerAddress, $paymentMethod);
 
         if ($result['success']) {
-            // Tạm thời hiển thị thông báo thành công
-            // Sau này có thể chuyển hướng đến trang cảm ơn
+            // Sau này, bạn có thể kiểm tra $paymentMethod ở đây
+            // Nếu là 'bank_transfer', chuyển hướng đến trang hướng dẫn thanh toán
+            // Nếu là 'cod', chuyển hướng đến trang cảm ơn
             echo "<h1>Đặt hàng thành công!</h1><p>Cảm ơn bạn đã mua hàng. Mã đơn hàng của bạn là: " . $result['order_id'] . "</p>";
             echo '<a href="/shoe-shop/public/">Quay lại trang chủ</a>';
             exit();

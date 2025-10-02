@@ -179,44 +179,88 @@ class ProductRepository
         $stmt->execute();
         return $stmt->fetch(PDO::FETCH_CLASS, 'ProductVariant');
     }
-    function update(Product $product, array $categoryIDs)
+    public function update(Product $product, array $categoryIDs, array $variantsData)
     {
         try {
             $this->conn->beginTransaction();
-            $query = "UPDATE products SET name=:name,slug=:slug,description=:description,price=:price,image_url=:image_url,stock=:stock,is_active=:is_active,updated_at=:updated_at WHERE id=:id";
+
+            // Bước 1: Cập nhật thông tin sản phẩm chính
+            $query = "UPDATE products SET
+                    name = :name,
+                    slug = :slug,
+                    description = :description,
+                    image_url = :image_url,
+                    is_active = :is_active
+                  WHERE id = :id";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(":id", $product->id);
             $stmt->bindParam(":name", $product->name);
             $stmt->bindParam(":slug", $product->slug);
             $stmt->bindParam(":description", $product->description);
-            $stmt->bindParam(":price", $product->price);
             $stmt->bindParam(":image_url", $product->image_url);
-            $stmt->bindParam(":stock", $product->stock);
             $stmt->bindParam(":is_active", $product->is_active);
-            $stmt->bindParam(":updated_at", $product->updated_at);
             $stmt->execute();
-            //
-            // xóa các danh mục cũ
-            $deleteQuery = "DELETE FROM product_category_map WHERE product_id = :product_id";
-            $deleteStmt = $this->conn->prepare($deleteQuery);
-            $deleteStmt->bindParam(":product_id", $product->id);
-            $deleteStmt->execute();
-            // thêm các danh mục mới
+
+            // Bước 2: Cập nhật danh mục (xóa cũ, thêm mới)
+            $this->conn->prepare("DELETE FROM product_category_map WHERE product_id = ?")->execute([$product->id]);
             if (!empty($categoryIDs)) {
-                $mapQuery = "INSERT INTO product_category_map (product_id,category_id) VALUES (:product_id,:category_id)";
+                $mapQuery = "INSERT INTO product_category_map (product_id, category_id) VALUES (?, ?)";
                 $mapStmt = $this->conn->prepare($mapQuery);
                 foreach ($categoryIDs as $categoryID) {
-                    $mapStmt->bindParam(":product_id", $product->id);
-                    $mapStmt->bindParam(":category_id", $categoryID);
-                    $mapStmt->execute();
+                    $mapStmt->execute([$product->id, $categoryID]);
                 }
             }
+
+            // Bước 3: Đồng bộ hóa các biến thể (phần phức tạp nhất)
+            $existingVariantIds = $this->getVariantIdsByProductId($product->id);
+            $submittedVariantIds = [];
+
+            foreach ($variantsData as $variant) {
+                $variantId = $variant['id'] ?? null;
+
+                if ($variantId) {
+                    // A. Biến thể đã có -> UPDATE
+                    $updateVariantQuery = "UPDATE product_variants SET price = ?, stock = ? WHERE id = ?";
+                    $this->conn->prepare($updateVariantQuery)->execute([$variant['price'], $variant['stock'], $variantId]);
+                    $submittedVariantIds[] = $variantId;
+                } else {
+                    // B. Biến thể mới -> INSERT
+                    $insertVariantQuery = "INSERT INTO product_variants (product_id, price, stock) VALUES (?, ?, ?)";
+                    $this->conn->prepare($insertVariantQuery)->execute([$product->id, $variant['price'], $variant['stock']]);
+                    $newVariantId = $this->conn->lastInsertId();
+
+                    $sizeValueId = $this->findOrCreateAttributeValue(1, $variant['size']);
+                    $colorValueId = $this->findOrCreateAttributeValue(2, $variant['color']);
+
+                    $vvQuery = "INSERT INTO variant_values (variant_id, attribute_value_id) VALUES (?, ?)";
+                    $vvStmt = $this->conn->prepare($vvQuery);
+                    $vvStmt->execute([$newVariantId, $sizeValueId]);
+                    $vvStmt->execute([$newVariantId, $colorValueId]);
+                }
+            }
+
+            // C. Tìm và xóa các biến thể đã bị admin xóa khỏi form
+            $variantsToDelete = array_diff($existingVariantIds, $submittedVariantIds);
+            if (!empty($variantsToDelete)) {
+                $deleteQuery = "DELETE FROM product_variants WHERE id IN (" . implode(',', array_fill(0, count($variantsToDelete), '?')) . ")";
+                $this->conn->prepare($deleteQuery)->execute(array_values($variantsToDelete));
+            }
+
             $this->conn->commit();
             return true;
         } catch (Exception $e) {
             $this->conn->rollBack();
+            error_log("Lỗi khi cập nhật sản phẩm: " . $e->getMessage());
             return false;
         }
+    }
+
+
+    private function getVariantIdsByProductId($productId)
+    {
+        $stmt = $this->conn->prepare("SELECT id FROM product_variants WHERE product_id = ?");
+        $stmt->execute([$productId]);
+        return $stmt->fetchAll(PDO::FETCH_COLUMN); // Lấy về mảng các ID
     }
 
     // Phương thức mới để tìm kiếm và lọc
@@ -300,5 +344,23 @@ class ProductRepository
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
+    }
+    public function findVariantById($variantId)
+    {
+        $query = "SELECT
+                pv.id, pv.price, pv.stock,
+                p.name AS product_name, p.image_url,
+                GROUP_CONCAT(av.value SEPARATOR ', ') as attributes
+              FROM product_variants pv
+              JOIN products p ON pv.product_id = p.id
+              LEFT JOIN variant_values vv ON pv.id = vv.variant_id
+              LEFT JOIN attribute_values av ON vv.attribute_value_id = av.id
+              WHERE pv.id = :id
+              GROUP BY pv.id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $variantId);
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'ProductVariant');
+        return $stmt->fetch();
     }
 }

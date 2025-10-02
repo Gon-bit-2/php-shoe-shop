@@ -1,18 +1,18 @@
 <?php
-
 require_once __DIR__ . '/../src/models/repositories/database.php';
 
 try {
     echo "==================================================\n";
-    echo "Bắt đầu chạy migration cho bảng Orders...\n";
+    echo "Bắt đầu chạy migration cho bảng Orders (đã nâng cấp)...\n";
     echo "==================================================\n";
 
-    // Xóa bảng cũ nếu tồn tại (để có thể chạy lại migration nhiều lần)
+    $conn->exec("SET FOREIGN_KEY_CHECKS=0;");
     $conn->exec("DROP TABLE IF EXISTS order_items;");
     $conn->exec("DROP TABLE IF EXISTS orders;");
+    $conn->exec("SET FOREIGN_KEY_CHECKS=1;");
     echo " -> Các bảng orders cũ (nếu có) đã được xóa.\n";
 
-    // 1. TẠO BẢNG `orders`
+    // Bảng `orders` (Không thay đổi)
     $sql_orders = "CREATE TABLE orders (
         id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
         user_id INT NOT NULL,
@@ -28,20 +28,21 @@ try {
     $conn->exec($sql_orders);
     echo " -> Bảng 'orders' đã được tạo.\n";
 
-    // 2. TẠO BẢNG `order_items`
+    // NÂNG CẤP BẢNG `order_items`
     $sql_order_items = "CREATE TABLE order_items (
-    id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
-    order_id BIGINT UNSIGNED NOT NULL,
-    product_id BIGINT UNSIGNED NULL,
-    product_name VARCHAR(191) NOT NULL,
-    quantity INT UNSIGNED NOT NULL,
-    price DECIMAL(12, 2) NOT NULL,
-    CONSTRAINT fk_oi_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-    CONSTRAINT fk_oi_product FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+        id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        order_id BIGINT UNSIGNED NOT NULL,
+        variant_id BIGINT UNSIGNED NULL, -- Đổi từ product_id
+        product_name VARCHAR(191) NOT NULL,
+        variant_attributes VARCHAR(255) NULL, -- Cột mới để lưu: '40, Đen'
+        quantity INT UNSIGNED NOT NULL,
+        price DECIMAL(12, 2) NOT NULL,
+        CONSTRAINT fk_oi_order FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+        -- Khóa ngoại mới trỏ đến product_variants
+        CONSTRAINT fk_oi_variant FOREIGN KEY (variant_id) REFERENCES product_variants(id) ON DELETE SET NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
     $conn->exec($sql_order_items);
-    echo " -> Bảng 'order_items' đã được tạo.\n";
-
+    echo " -> Bảng 'order_items' đã được nâng cấp.\n";
 
     echo "✅ Migration cho Orders hoàn tất!\n";
 } catch (PDOException $e) {
