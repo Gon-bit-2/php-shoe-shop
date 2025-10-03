@@ -3,8 +3,9 @@ class OrderItem
 {
     public $id;
     public $order_id;
-    public $product_id;
+    public $variant_id;
     public $product_name;
     public $quantity;
     public $price;
+    public $variant_attributes;
 }

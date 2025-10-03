@@ -110,7 +110,7 @@ class ProductController
     //method user
     public function getAllProductsActive()
     {
-        $products = $this->productService->getAllProductsActive();
+        $products = $this->productService->getAllProductsActive([]);
         $categories = $this->productService->getAllCategories();
         require_once __DIR__ . '/../views/home/products/index.php';
     }

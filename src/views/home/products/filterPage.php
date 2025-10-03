@@ -72,7 +72,7 @@ function buildFilterUrl($newParams)
                             <div class="bg-white rounded-lg shadow-md overflow-hidden group">
                                 <a href="/shoe-shop/public/product/<?= htmlspecialchars($product->id) ?>">
                                     <div class="relative">
-                                        <img src="/shoe-shop/public<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>" class="w-full h-64 object-cover">
+                                        <img src="<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>" class="w-full h-64 object-cover">
                                     </div>
                                     <div class="p-4 text-center">
                                         <h3 class="text-lg font-semibold text-gray-800 truncate"><?= htmlspecialchars($product->name) ?></h3>

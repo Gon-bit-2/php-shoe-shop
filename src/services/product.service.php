@@ -164,8 +164,8 @@ class ProductService
 
         // Di chuyển file từ thư mục tạm sang thư mục đích
         if (move_uploaded_file($file['tmp_name'], $targetFile)) {
-            // Trả về đường dẫn công khai để lưu vào database
-            return '/images/products/' . $fileName;
+            // Trả về đường dẫn đầy đủ và chính xác từ thư mục gốc của web
+            return '/shoe-shop/public/images/products/' . $fileName;
         }
 
         return null; // Di chuyển thất bại

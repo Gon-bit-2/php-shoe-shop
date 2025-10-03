@@ -54,7 +54,7 @@
                             <div class="bg-white rounded-lg shadow-md overflow-hidden group">
                                 <a href="/shoe-shop/public/product/<?= htmlspecialchars($product->id) ?>">
                                     <div class="relative hover:scale-105 transition-all duration-300">
-                                        <img src="/shoe-shop/public<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>" class="w-full h-64 object-cover ">
+                                        <img src="<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>" class="w-full h-64 object-cover ">
                                         <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
                                             <span class="text-white text-lg font-bold border-2 border-white py-2 px-4">Xem Chi Tiết</span>
                                         </div>

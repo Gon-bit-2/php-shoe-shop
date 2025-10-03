@@ -68,7 +68,7 @@
                         <?php foreach ($cartItems as $item): ?>
                             <div class="flex justify-between items-center mb-3">
                                 <div class="flex items-center">
-                                    <img src="/shoe-shop/public<?= htmlspecialchars($item->image_url) ?>" alt="<?= htmlspecialchars($item->product_name) ?>" class="w-16 h-16 object-cover rounded-md">
+                                    <img src="<?= htmlspecialchars($item->image_url) ?>" alt="<?= htmlspecialchars($item->product_name) ?>" class="w-16 h-16 object-cover rounded-md">
                                     <div class="ml-4">
                                         <p class="font-bold"><?= htmlspecialchars($item->product_name) ?></p>
                                         <p class="text-sm text-gray-500"><?= htmlspecialchars($item->attributes) ?></p>

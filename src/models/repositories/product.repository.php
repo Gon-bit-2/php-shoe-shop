@@ -266,50 +266,53 @@ class ProductRepository
     // Phương thức mới để tìm kiếm và lọc
     public function findWithFilters($filters = [])
     {
-        // Lấy các giá trị lọc ra
         $searchTerm = $filters['search'] ?? '';
         $categoryId = $filters['category'] ?? null;
-        // --- THÊM DÒNG MỚI ---
-        $priceRange = $filters['price'] ?? null; // price sẽ có dạng "min-max"
+        $priceRange = $filters['price'] ?? null;
 
-        // ... (code xây dựng query và params như cũ) ...
-        $query = "SELECT p.*, GROUP_CONCAT(c.name SEPARATOR ', ') as category_names
+        // **TRUY VẤN ĐÃ SỬA ĐỔI BẮT ĐẦU TỪ ĐÂY**
+        // Chúng ta chọn p.* và thêm một trường mới 'price' là giá MIN từ các biến thể
+        $query = "SELECT p.*, MIN(pv.price) as price
               FROM products p
               LEFT JOIN product_category_map pcm ON p.id = pcm.product_id
               LEFT JOIN categories c ON pcm.category_id = c.id
+              -- Quan trọng: JOIN với product_variants để lấy giá
+              LEFT JOIN product_variants pv ON p.id = pv.product_id
               WHERE p.is_active = 1";
+        // **TRUY VẤN ĐÃ SỬA ĐỔI KẾT THÚC TẠI ĐÂY**
+
         $params = [];
 
-        // Nếu có từ khóa tìm kiếm, thêm điều kiện vào câu lệnh WHERE
         if (!empty($searchTerm)) {
             $query .= " AND p.name LIKE :search";
             $params[':search'] = '%' . $searchTerm . '%';
         }
-        // Nếu có lọc theo danh mục, thêm điều kiện vào câu lệnh WHERE
+
         if (!empty($categoryId)) {
-            $query .= " AND p.id IN (SELECT product_id FROM product_category_map WHERE category_id = :category_id)";
+            // Thay đổi điều kiện để không gây lỗi ambiguous column
+            $query .= " AND pcm.category_id = :category_id";
             $params[':category_id'] = $categoryId;
         }
 
-
-        //  LỌC GIÁ
+        // Lọc giá bây giờ hoạt động trên giá của các biến thể
         if (!empty($priceRange)) {
-            // Tách chuỗi "min-max" thành 2 biến
             $priceParts = explode('-', $priceRange);
             $minPrice = $priceParts[0] ?? 0;
             $maxPrice = $priceParts[1] ?? null;
 
+            // Chúng ta sẽ lọc dựa trên giá của các biến thể
             if (is_numeric($minPrice)) {
-                $query .= " AND p.price >= :min_price";
+                // Sửa đổi để lọc trên bảng pv
+                $query .= " AND pv.price >= :min_price";
                 $params[':min_price'] = $minPrice;
             }
 
             if (is_numeric($maxPrice)) {
-                $query .= " AND p.price <= :max_price";
+                // Sửa đổi để lọc trên bảng pv
+                $query .= " AND pv.price <= :max_price";
                 $params[':max_price'] = $maxPrice;
             }
         }
-        //
 
         $query .= " GROUP BY p.id ORDER BY p.created_at DESC";
 

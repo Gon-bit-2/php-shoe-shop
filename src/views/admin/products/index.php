@@ -40,7 +40,7 @@
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                     <?php if (!empty($product->image_url)): ?>
-                                        <img src="/shoe-shop/public<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>" class="w-16 h-16 object-cover rounded">
+                                        <img src="<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>" class="w-16 h-16 object-cover rounded">
                                     <?php else: ?>
                                         <span class="text-gray-400">Không có ảnh</span>
                                     <?php endif; ?>

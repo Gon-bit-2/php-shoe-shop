@@ -39,7 +39,7 @@
         <div class="md:flex md:items-start">
             <div class="w-full md:w-1/2">
                 <div class="bg-white rounded-lg shadow-md p-4">
-                    <img id="product-image" class="w-full h-auto object-cover rounded-lg" src="/shoe-shop/public<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>">
+                    <img id="product-image" class="w-full h-auto object-cover rounded-lg" src="<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>">
                 </div>
             </div>
 

@@ -33,7 +33,7 @@
                 <input type="file" name="image" id="image" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700">
                 <?php if ($product->image_url): ?>
                     <div class="mt-2">
-                        <img src="/shoe-shop/public<?= htmlspecialchars($product->image_url) ?>" alt="Ảnh hiện tại" class="w-32 h-32 object-cover rounded">
+                        <img src="<?= htmlspecialchars($product->image_url) ?>" alt="Ảnh hiện tại" class="w-32 h-32 object-cover rounded">
                         <p class="text-xs text-gray-500">Ảnh hiện tại. Tải lên ảnh mới sẽ thay thế ảnh này.</p>
                     </div>
                 <?php endif; ?>

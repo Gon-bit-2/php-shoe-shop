@@ -33,7 +33,7 @@
                     <?php foreach ($cartItems as $variantId => $item): ?>
                         <div class="flex items-center justify-between border-b pb-4 mb-4">
                             <div class="flex items-center">
-                                <img src="/shoe-shop/public<?= htmlspecialchars($item->image_url) ?>" alt="<?= htmlspecialchars($item->product_name) ?>" class="w-24 h-24 object-cover rounded-md">
+                                <img src="<?= htmlspecialchars($item->image_url) ?>" alt="<?= htmlspecialchars($item->product_name) ?>" class="w-24 h-24 object-cover rounded-md">
                                 <div class="ml-4">
                                     <h3 class="font-bold text-lg"><?= htmlspecialchars($item->product_name) ?></h3>
                                     <p class="text-sm text-gray-500"><?= htmlspecialchars($item->attributes) ?></p>
