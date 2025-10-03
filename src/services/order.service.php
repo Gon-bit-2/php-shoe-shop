@@ -83,4 +83,9 @@ class OrderService
     {
         return $this->orderRepository->findOrdersByUserId($userId);
     }
+    //////////////review////////////////
+    public function getProductsAwaitingReview($userId)
+    {
+        return $this->orderRepository->findProductsAwaitingReview($userId);
+    }
 }

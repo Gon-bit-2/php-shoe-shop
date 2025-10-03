@@ -1,5 +1,5 @@
 <?php
-class AttributeValue
+class Attribute
 {
     public $id;
     public $name;

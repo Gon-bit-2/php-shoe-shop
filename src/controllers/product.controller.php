@@ -1,11 +1,14 @@
 <?php
 require_once '../src/services/product.service.php';
+require_once '../src/services/review.service.php';
 class ProductController
 {
     private $productService;
+    private $reviewService;
     public function __construct($conn)
     {
         $this->productService = new ProductService($conn);
+        $this->reviewService = new ReviewService($conn);
     }
     //method admin
     public function create($errorMessage = '', $oldInput = [])
@@ -128,10 +131,45 @@ class ProductController
         $product = $data->product;
         $variants = $data->variants;
         $options = $data->options;
+        $reviews = $data->reviews;
+        //
+        $eligibility = (object)['canReview' => false, 'orderId' => null];
+        if (isset($_SESSION['user']['id'])) {
+            $userId = $_SESSION['user']['id'];
+            $eligibility = $this->reviewService->checkReviewEligibility($userId, $id);
+        }
 
+        // Truyền thẳng kết quả từ service vào view
+        $canReview = $eligibility->canReview;
+        $orderIdForReview = $eligibility->orderId;
         // Nạp view và truyền dữ liệu sang
         // (Đổi tên file view nếu cần, ở đây tôi dùng lại file cũ)
         require_once __DIR__ . '/../views/home/products/detailProduct.php';
+    }
+    public function addReview($productId)
+    {
+        // 1. Kiểm tra đăng nhập
+        if (!isset($_SESSION['user']['id'])) {
+            // Controller vẫn chịu trách nhiệm điều hướng
+            header('Location: /shoe-shop/public/login');
+            exit();
+        }
+
+        // 2. Lấy dữ liệu từ request
+        $userId = $_SESSION['user']['id'];
+        $orderId = $_POST['order_id'] ?? null;
+        $rating = $_POST['rating'] ?? 0;
+        $comment = $_POST['comment'] ?? '';
+
+        // 3. Giao toàn bộ việc xử lý cho Service
+        $result = $this->reviewService->createReview($productId, $userId, $orderId, $rating, $comment);
+
+        // 4. Dựa vào kết quả từ Service để điều hướng
+        // Ví dụ: Lưu thông báo vào session để hiển thị cho người dùng
+        $_SESSION['flash_message'] = $result['message'];
+
+        header('Location: /shoe-shop/public/product/' . $productId);
+        exit();
     }
     public function showProductPage()
     {

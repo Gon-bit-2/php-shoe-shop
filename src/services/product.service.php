@@ -1,14 +1,17 @@
 <?php
 require_once '../src/models/repositories/product.repository.php';
 require_once '../src/models/repositories/category.repository.php';
+require_once '../src/services/review.service.php';
 class ProductService
 {
     private $productRepository;
     private $categoryRepository;
+    private $reviewService;
     public function __construct($conn)
     {
         $this->productRepository = new ProductRepository($conn);
         $this->categoryRepository = new CategoryRepository($conn);
+        $this->reviewService = new ReviewService($conn);
     }
     public function getAllCategories()
     {
@@ -70,7 +73,7 @@ class ProductService
 
         // Lấy dữ liệu thô của các biến thể
         $variantsRaw = $this->productRepository->findVariantsByProductId($productId);
-
+        $reviews = $this->reviewService->getApprovedReviewsForProduct($productId);
         // Xử lý dữ liệu thô thành một cấu trúc có tổ chức
         $variants = [];
         $options = []; // Mảng để lưu các lựa chọn Size, Màu có sẵn
@@ -102,7 +105,8 @@ class ProductService
         return (object)[
             'product' => $product,
             'variants' => array_values($variants), // Chuyển về mảng tuần tự
-            'options' => $options // Ví dụ: ['Size' => ['40', '41'], 'Màu sắc' => ['Đen', 'Trắng']]
+            'options' => $options, // Ví dụ: ['Size' => ['40', '41'], 'Màu sắc' => ['Đen', 'Trắng']]
+            'reviews' => $reviews //  các đánh giá đã được duyệt
         ];
     }
     public function updateProduct($id, $data)

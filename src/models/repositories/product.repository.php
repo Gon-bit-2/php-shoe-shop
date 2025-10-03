@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../product.php';
 require_once __DIR__ . '/../productVariant.php';
-require_once __DIR__ . '/../attribute.php';
+require_once __DIR__ . '/../attribute_value.php';
 class ProductRepository
 {
     private $conn;
@@ -57,8 +57,8 @@ class ProductRepository
                 $variantId = $this->conn->lastInsertId();
 
                 // 3.2. Lấy ID của giá trị thuộc tính (Size và Màu)
-                $sizeValueId = $this->findOrCreateAttributeValue(1, $variant['size']); // Giả định ID 'Size' là 1
-                $colorValueId = $this->findOrCreateAttributeValue(2, $variant['color']); // Giả định ID 'Màu sắc' là 2
+                $sizeValueId = $this->findOrCreateAttributeValue(1, $variant['size']);
+                $colorValueId = $this->findOrCreateAttributeValue(2, $variant['color']);
 
                 // 3.3. Tạo liên kết trong `variant_values` (thực thi 2 lần)
                 $vvStmt->execute([$variantId, $sizeValueId]);
@@ -69,7 +69,6 @@ class ProductRepository
             return $productId;
         } catch (Exception $e) {
             $this->conn->rollBack();
-            // Ghi lại lỗi chi tiết vào error log của server để dễ debug sau này
             error_log("Lỗi khi lưu sản phẩm: " . $e->getMessage());
             return false;
         }
@@ -116,7 +115,7 @@ class ProductRepository
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":attribute_name", $attributeName);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_CLASS, 'AttributeValue'); // Lấy về mảng các giá trị
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'AttributeValue');
     }
     function findAll()
     {

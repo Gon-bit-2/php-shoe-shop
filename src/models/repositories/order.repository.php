@@ -103,4 +103,51 @@ class OrderRepository
         // Chúng ta vẫn dùng FETCH_CLASS để nhận về một mảng các đối tượng Order
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Order');
     }
+
+    //////////////review////////////////
+    public function findPurchasedOrderForReview($userId, $productId)
+    {
+        $query = "SELECT o.id
+                  FROM orders o
+                  JOIN order_items oi ON o.id = oi.order_id
+                  JOIN product_variants pv ON oi.variant_id = pv.id
+                  -- LEFT JOIN để kiểm tra xem đã có review chưa
+                  LEFT JOIN reviews r ON o.id = r.order_id AND pv.product_id = r.product_id AND o.user_id = r.user_id
+                  WHERE o.user_id = :user_id
+                    AND pv.product_id = :product_id
+                    AND o.status = 'completed'
+                    -- Chỉ lấy đơn hàng mà chưa có review tương ứng
+                    AND r.id IS NULL
+                  LIMIT 1"; // Chỉ cần tìm 1 đơn hàng là đủ
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $userId);
+        $stmt->bindParam(":product_id", $productId);
+        $stmt->execute();
+
+        // Trả về ID đơn hàng nếu tìm thấy, ngược lại trả về false
+        return $stmt->fetchColumn();
+    }
+    public function findProductsAwaitingReview($userId)
+    {
+        // Câu lệnh này sẽ trả về thông tin của từng sản phẩm cần được đánh giá
+        $query = "SELECT DISTINCT
+                    p.id,
+                    p.name,
+                    p.image_url
+                  FROM orders o
+                  JOIN order_items oi ON o.id = oi.order_id
+                  JOIN product_variants pv ON oi.variant_id = pv.id
+                  JOIN products p ON pv.product_id = p.id
+                  -- Dùng LEFT JOIN để tìm những sản phẩm chưa có trong bảng reviews
+                  LEFT JOIN reviews r ON p.id = r.product_id AND o.user_id = r.user_id
+                  WHERE o.user_id = :user_id
+                    AND o.status = 'completed'
+                    AND r.id IS NULL"; // Điều kiện quan trọng: chỉ lấy những sp chưa có review
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':user_id' => $userId]);
+        // Dùng FETCH_CLASS với Product vì chúng ta đang lấy thông tin sản phẩm
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
+    }
 }

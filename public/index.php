@@ -170,11 +170,17 @@ switch ($path) {
         }
         // user detail product
         if (preg_match('/^\/product\/(\d+)$/', $path, $matches)) {
-            require_once '../src/controllers/product.controller.php';
             $controller = new ProductController($conn);
             $productId = $matches[1];
             $controller->showProductDetail($productId);
             break; //
+        }
+        // user add review
+        if (preg_match('/^\/product\/(\d+)\/review$/', $path, $matches) && $method == 'POST') {
+            $controller = new ProductController($conn);
+            $productId = $matches[1];
+            $controller->addReview($productId);
+            break;
         }
         //
         if (preg_match('/^\/admin\/orders\/update-status\/(\d+)$/', $path, $matches) && $method == 'POST') {

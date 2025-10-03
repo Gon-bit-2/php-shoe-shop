@@ -88,13 +88,15 @@ class OrderController
     //
     public function showPurchaseHistory()
     {
-        // Lấy ID người dùng từ session đã đăng nhập
         $userId = $_SESSION['user']['id'];
 
-        // Gọi service để lấy danh sách đơn hàng của người dùng đó
+        // Lấy danh sách đơn hàng (giữ nguyên)
         $orders = $this->orderService->getOrdersByUserId($userId);
 
-        // Nạp view để hiển thị
+        // THÊM MỚI: Lấy danh sách các sản phẩm đang chờ được đánh giá
+        $productsToReview = $this->orderService->getProductsAwaitingReview($userId);
+
+        // Nạp view và truyền cả 2 biến sang
         require_once __DIR__ . '/../views/home/history/index.php';
     }
 }
