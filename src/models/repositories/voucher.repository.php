@@ -35,4 +35,55 @@ class VoucherRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher');
     }
+    public function findByCode($code)
+    {
+        $query = "SELECT * FROM vouchers WHERE code = :code LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':code' => $code]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Voucher');
+        return $stmt->fetch();
+    }
+    public function findById($id)
+    {
+        $query = "SELECT * FROM vouchers WHERE id = :id LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id", $id);
+        $stmt->execute();
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'Voucher');
+        return $stmt->fetch();
+    }
+    public function update(Voucher $voucher)
+    {
+        $query = "UPDATE vouchers SET
+                    code = :code,
+                    type = :type,
+                    value = :value,
+                    min_spend = :min_spend,
+                    quantity = :quantity,
+                    starts_at = :starts_at,
+                    expires_at = :expires_at,
+                    is_active = :is_active
+                  WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+
+        $starts_at_formatted = !empty($voucher->starts_at) ? date('Y-m-d H:i:s', strtotime($voucher->starts_at)) : null;
+        $expires_at_formatted = !empty($voucher->expires_at) ? date('Y-m-d H:i:s', strtotime($voucher->expires_at)) : null;
+        $stmt->bindParam(":id", $voucher->id);
+        $stmt->bindParam(":code", $voucher->code);
+        $stmt->bindParam(":type", $voucher->type);
+        $stmt->bindParam(":value", $voucher->value);
+        $stmt->bindParam(":min_spend", $voucher->min_spend);
+        $stmt->bindParam(":quantity", $voucher->quantity);
+        $stmt->bindParam(":starts_at", $starts_at_formatted);
+        $stmt->bindParam(":expires_at", $expires_at_formatted);
+        $stmt->bindParam(":is_active", $voucher->is_active);
+        return $stmt->execute();
+    }
+    public function incrementUsedCount($code)
+    {
+        $query = "UPDATE vouchers SET used_count = used_count + 1 WHERE code = :code";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":code", $code);
+        return $stmt->execute();
+    }
 }

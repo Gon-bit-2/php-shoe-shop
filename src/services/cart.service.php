@@ -1,14 +1,15 @@
 <?php
 require_once __DIR__ . '/../models/repositories/product.repository.php';
 require_once __DIR__ . '/../models/productVariant.php';
-
+require_once __DIR__ . '/../services/voucher.service.php';
 class CartService
 {
     private $productRepository;
-
+    private $voucherService;
     public function __construct($conn)
     {
         $this->productRepository = new ProductRepository($conn);
+        $this->voucherService = new VoucherService($conn);
     }
 
     public function addToCart($variantId, $quantity)
@@ -107,7 +108,55 @@ class CartService
         }
         return $total;
     }
+    public function applyVoucher($code)
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
+        $cartTotal = $this->getCartTotal();
+        $result = $this->voucherService->validateAndApplyVoucher($code, $cartTotal);
+
+        if ($result['success']) {
+            $_SESSION['cart_voucher'] = [
+                'code' => $result['voucher_code'],
+                'discount_amount' => $result['discount_amount']
+            ];
+            $_SESSION['cart_success_message'] = 'Áp dụng mã giảm giá thành công!';
+        } else {
+            // Nếu thất bại, xóa voucher cũ (nếu có) và set lỗi
+            unset($_SESSION['cart_voucher']);
+            $_SESSION['cart_error_message'] = $result['message'];
+        }
+    }
+    public function removeVoucher()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        unset($_SESSION['cart_voucher']);
+        $_SESSION['cart_success_message'] = 'Đã xóa mã giảm giá.';
+    }
+
+    public function getFinalCartDetails()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+
+        $subtotal = $this->getCartTotal();
+        $voucher = $_SESSION['cart_voucher'] ?? null;
+        $discount = $voucher['discount_amount'] ?? 0;
+        $finalTotal = $subtotal - $discount;
+
+        return (object)[
+            'items' => $this->getCartItems(),
+            'subtotal' => $subtotal,
+            'voucher_code' => $voucher['code'] ?? null,
+            'discount' => $discount,
+            'final_total' => $finalTotal
+        ];
+    }
     public function clearCart()
     {
         // Đảm bảo session đã được bắt đầu

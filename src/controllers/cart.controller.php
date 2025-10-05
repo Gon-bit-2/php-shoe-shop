@@ -30,8 +30,9 @@ class CartController
             session_start();
         }
 
-        $cartItems = $this->cartService->getCartItems();
-        $cartTotal = $this->cartService->getCartTotal();
+        // $cartItems = $this->cartService->getCartItems();
+        // $cartTotal = $this->cartService->getCartTotal();
+        $cartDetails = $this->cartService->getFinalCartDetails();
         require_once __DIR__ . '/../views/home/cart/index.php';
     }
     function update()
@@ -48,7 +49,22 @@ class CartController
         header('Location: /shoe-shop/public/cart');
         exit();
     }
+    public function applyVoucher()
+    {
+        $code = trim($_POST['voucher_code'] ?? '');
+        if (!empty($code)) {
+            $this->cartService->applyVoucher($code);
+        }
+        header('Location: /shoe-shop/public/cart');
+        exit();
+    }
 
+    public function removeVoucher()
+    {
+        $this->cartService->removeVoucher();
+        header('Location: /shoe-shop/public/cart');
+        exit();
+    }
     function remove()
     {
         // Đảm bảo session đã được bắt đầu

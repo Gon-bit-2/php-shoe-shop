@@ -17,25 +17,42 @@ class OrderService
 
     public function createOrder($userId, $customerName, $customerPhone, $customerAddress, $paymentMethod)
     {
-        $cartItems = $this->cartService->getCartItems();
-        $cartTotal = $this->cartService->getCartTotal();
+        // THAY ĐỔI 1: Lấy tất cả chi tiết giỏ hàng, bao gồm cả voucher
+        $cartDetails = $this->cartService->getFinalCartDetails();
 
-        if (empty($cartItems)) {
+        if (empty($cartDetails->items)) {
             return ['success' => false, 'message' => 'Giỏ hàng của bạn trống!'];
         }
 
         try {
             $this->conn->beginTransaction();
 
-            // Truyền thêm $paymentMethod vào hàm
-            $orderId = $this->orderRepository->createOrderRecord($userId, $customerName, $customerPhone, $customerAddress, $cartTotal, $paymentMethod);
+            // THAY ĐỔI 2: Truyền vào tổng tiền cuối cùng và thông tin voucher
+            $orderId = $this->orderRepository->createOrderRecord(
+                $userId,
+                $customerName,
+                $customerPhone,
+                $customerAddress,
+                $cartDetails->final_total, // Sử dụng final_total
+                $paymentMethod,
+                $cartDetails->voucher_code, // Thêm voucher_code
+                $cartDetails->discount // Thêm discount_amount
+            );
+
             if (!$orderId) {
                 throw new Exception("Không thể tạo đơn hàng.");
             }
 
-            foreach ($cartItems as $variantId => $item) {
+            // Cập nhật kho và lưu các mục đơn hàng (giữ nguyên)
+            foreach ($cartDetails->items as $variantId => $item) {
                 $this->orderRepository->updateVariantStock($variantId, $item->quantity);
                 $this->orderRepository->createOrderItemRecord($orderId, $variantId, $item);
+            }
+
+            // THAY ĐỔI 3: Nếu có voucher, tăng số lượt sử dụng
+            if ($cartDetails->voucher_code) {
+                $voucherRepo = new VoucherRepository($this->conn); // Tạo instance mới
+                $voucherRepo->incrementUsedCount($cartDetails->voucher_code);
             }
 
             $this->conn->commit();

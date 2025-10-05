@@ -11,7 +11,8 @@ class Order
     public $status;
     public $created_at;
     public $updated_at;
-
+    public $voucher_code;
+    public $discount_amount;
     // Từ JOIN
     public $fullname; // khi SELECT u.fullname
     public $email;    // khi SELECT u.email

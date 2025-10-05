@@ -56,7 +56,7 @@
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <a href="#" class="text-indigo-600 hover:text-indigo-900">Sửa</a>
+                                    <a href="/shoe-shop/public/admin/vouchers/edit/<?= $voucher->id ?>" class="text-indigo-600 hover:text-indigo-900">Sửa</a>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

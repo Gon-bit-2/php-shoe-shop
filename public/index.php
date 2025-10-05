@@ -126,6 +126,18 @@ switch ($path) {
             $controller->update();
         }
         break;
+    case '/cart/apply-voucher':
+        if ($method == 'POST') {
+            $controller = new CartController($conn);
+            $controller->applyVoucher();
+        }
+        break;
+    case '/cart/remove-voucher':
+        if ($method == 'POST') {
+            $controller = new CartController($conn);
+            $controller->removeVoucher();
+        }
+        break;
     case '/cart/remove':
         if ($method == 'POST') {
             $controller = new CartController($conn);
@@ -208,6 +220,17 @@ switch ($path) {
             $controller = new OrderController($conn);
             $orderId = $matches[1]; // Lấy ID từ URL
             $controller->getOrderDetail($orderId);
+            break;
+        }
+        // admin edit voucher
+        if (preg_match('/^\/admin\/vouchers\/edit\/(\d+)$/', $path, $matches)) {
+            $controller = new VoucherController($conn);
+            $voucherId = $matches[1];
+            if ($method == 'GET') {
+                $controller->edit($voucherId);
+            } elseif ($method == 'POST') {
+                $controller->update($voucherId);
+            }
             break;
         }
         echo "404 - Trang không tồn tại";

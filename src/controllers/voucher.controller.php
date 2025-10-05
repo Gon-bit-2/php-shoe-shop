@@ -34,4 +34,27 @@ class VoucherController
             $this->create("Có lỗi xảy ra, vui lòng thử lại.", $_POST);
         }
     }
+    public function edit($id, $errorMessage = '', $oldInput = [])
+    {
+        $voucher = $this->voucherService->getVoucherById($id);
+        if (!$voucher) {
+            http_response_code(404);
+            echo "404 Not Found - Voucher không tồn tại.";
+            exit();
+        }
+        require_once __DIR__ . '/../views/admin/voucher/edit.php';
+    }
+
+    // Xử lý cập nhật voucher
+    public function update($id)
+    {
+        $result = $this->voucherService->updateVoucher($id, $_POST);
+
+        if ($result) {
+            header('Location: /shoe-shop/public/admin/vouchers');
+            exit();
+        } else {
+            $this->edit($id, "Có lỗi xảy ra, vui lòng thử lại.", $_POST);
+        }
+    }
 }

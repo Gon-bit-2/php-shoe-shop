@@ -9,10 +9,10 @@ class OrderRepository
     {
         $this->conn = $conn;
     }
-    public function createOrderRecord($userId, $name, $phone, $address, $total, $paymentMethod)
+    public function createOrderRecord($userId, $name, $phone, $address, $total, $paymentMethod, $voucherCode, $discountAmount)
     {
-        $query = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_address, total_amount, payment_method)
-              VALUES (:user_id, :name, :phone, :address, :total, :payment_method)";
+        $query = "INSERT INTO orders (user_id, customer_name, customer_phone, customer_address, total_amount, payment_method, voucher_code, discount_amount)
+              VALUES (:user_id, :name, :phone, :address, :total, :payment_method, :voucher_code, :discount_amount)";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([
             ':user_id' => $userId,
@@ -20,7 +20,9 @@ class OrderRepository
             ':phone' => $phone,
             ':address' => $address,
             ':total' => $total,
-            ':payment_method' => $paymentMethod
+            ':payment_method' => $paymentMethod,
+            ':voucher_code' => $voucherCode,
+            ':discount_amount' => $discountAmount
         ]);
         return $this->conn->lastInsertId();
     }
