@@ -13,7 +13,7 @@
 
     <main>
         <section class="relative bg-gray-900 text-white">
-            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ab?q=80&w=2070&auto=format&fit=crop"
+            <img src="./images/banner/banner01.png"
                 alt="Running shoe banner" class="w-full h-[60vh] object-cover opacity-50">
             <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                 <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Bộ Sưu Tập Mới Nhất</h1>
@@ -26,14 +26,10 @@
             <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Khám phá Danh mục</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <?php if (!empty($categories)): ?>
-                    <?php
-                    // Chỉ lấy 4 danh mục đầu tiên để hiển thị
-                    $featuredCategories = array_slice($categories, 0, 4);
-                    ?>
+                    <?php $featuredCategories = array_slice($categories, 0, 4); ?>
                     <?php foreach ($featuredCategories as $category): ?>
                         <a href="#" class="relative rounded-lg overflow-hidden group">
-                            <img src="https://via.placeholder.com/400x300.png/007bff/FFFFFF?text=<?= urlencode($category->name) ?>"
-                                alt="<?= htmlspecialchars($category->name) ?>" class="w-full h-48 object-cover">
+                            <img src="<?= htmlspecialchars($category->image_url) ?>" alt="<?= htmlspecialchars($category->name) ?>" class="w-full h-48 object-cover">
                             <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                                 <h3 class="text-white text-2xl font-bold group-hover:scale-110 transition-transform duration-300"><?= htmlspecialchars($category->name) ?></h3>
                             </div>

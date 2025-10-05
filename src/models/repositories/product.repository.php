@@ -365,4 +365,40 @@ class ProductRepository
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'ProductVariant');
         return $stmt->fetch();
     }
+    public function findRelatedProducts($categoryIDs, $currentProductId, $limit = 4)
+    {
+        // Đảm bảo $categoryIDs là một mảng và không rỗng
+        if (empty($categoryIDs) || !is_array($categoryIDs)) {
+            return [];
+        }
+
+        // Tạo chuỗi placeholder (?) cho câu lệnh IN, ví dụ: (?, ?, ?)
+        $placeholders = implode(',', array_fill(0, count($categoryIDs), '?'));
+
+        $query = "SELECT p.*, MIN(pv.price) as price
+                  FROM products p
+                  JOIN product_category_map pcm ON p.id = pcm.product_id
+                  JOIN product_variants pv ON p.id = pv.product_id
+                  -- Sửa điều kiện WHERE để dùng IN với nhiều category
+                  WHERE pcm.category_id IN ($placeholders)
+                    AND p.id != ? -- Placeholder cho currentProductId
+                    AND p.is_active = 1
+                  GROUP BY p.id
+                  ORDER BY RAND()
+                  LIMIT ?";
+
+        // Gộp tất cả các tham số vào một mảng
+        $params = array_merge($categoryIDs, [$currentProductId, $limit]);
+
+        $stmt = $this->conn->prepare($query);
+
+        // PDO không thể bindParam với limit
+        // Bắt đầu bind từ index 1
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key + 1, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
+    }
 }

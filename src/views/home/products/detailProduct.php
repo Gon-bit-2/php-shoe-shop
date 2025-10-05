@@ -59,6 +59,7 @@
 
 <body class="bg-gray-50">
     <?php require_once __DIR__ . '/../../layout/header.php'; ?>
+
     <main class="container mx-auto px-6 py-12">
 
         <?php if (isset($_SESSION['flash_message'])): ?>
@@ -176,6 +177,26 @@
                 <?php endif; ?>
             </div>
         </div>
+        <?php if (!empty($relatedProducts)): ?>
+            <section class="mt-16">
+                <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Sản phẩm tương tự</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <?php foreach ($relatedProducts as $related): ?>
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden group">
+                            <a href="/shoe-shop/public/product/<?= htmlspecialchars($related->id) ?>">
+                                <div class="relative hover:scale-105 transition-all duration-300">
+                                    <img src="<?= htmlspecialchars($related->image_url) ?>" alt="<?= htmlspecialchars($related->name) ?>" class="w-full h-64 object-cover">
+                                </div>
+                                <div class="p-4 text-center">
+                                    <h3 class="text-lg font-semibold text-gray-800 truncate"><?= htmlspecialchars($related->name) ?></h3>
+                                    <p class="text-black font-bold text-xl mt-2"><?= number_format($related->price) ?> VNĐ</p>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </section>
+        <?php endif; ?>
     </main>
     <?php require_once __DIR__ . '/../../layout/footer.php'; ?>
 
@@ -229,9 +250,16 @@
             button.addEventListener('click', () => {
                 const group = button.dataset.group;
                 const value = button.dataset.value;
-                document.querySelectorAll(`.option-btn[data-group="${group}"]`).forEach(btn => btn.classList.remove('selected'));
-                button.classList.add('selected');
-                currentSelection[group] = value;
+                if (button.classList.contains('selected')) {
+                    // Nếu đang được chọn, hãy bỏ chọn nó
+                    button.classList.remove('selected');
+                    currentSelection[group] = null;
+                } else {
+                    // Nếu không, hãy thực hiện logic chọn như cũ
+                    document.querySelectorAll(`.option-btn[data-group="${group}"]`).forEach(btn => btn.classList.remove('selected'));
+                    button.classList.add('selected');
+                    currentSelection[group] = value;
+                }
                 updateUI();
             });
         });

@@ -132,6 +132,7 @@ class ProductController
         $variants = $data->variants;
         $options = $data->options;
         $reviews = $data->reviews;
+        $relatedProducts = $data->relatedProducts;
         //
         $eligibility = (object)['canReview' => false, 'orderId' => null];
         if (isset($_SESSION['user']['id'])) {

@@ -77,6 +77,14 @@ class ProductService
         // Xử lý dữ liệu thô thành một cấu trúc có tổ chức
         $variants = [];
         $options = []; // Mảng để lưu các lựa chọn Size, Màu có sẵn
+        // Lấy danh mục đầu tiên của sản phẩm để tìm sản phẩm liên quan
+        $relatedProducts = [];
+        $categoryIDs = $this->productRepository->findCategoryByProductId($productId);
+
+        // Chỉ cần kiểm tra mảng không rỗng và truyền thẳng vào hàm
+        if (!empty($categoryIDs)) {
+            $relatedProducts = $this->productRepository->findRelatedProducts($categoryIDs, $productId, 4);
+        }
         foreach ($variantsRaw as $row) {
             $variantId = $row->id;
 
@@ -86,7 +94,8 @@ class ProductService
                     'id' => $variantId,
                     'price' => $row->price,
                     'stock' => $row->stock,
-                    'attributes' => []
+                    'attributes' => [],
+
                 ];
             }
 
@@ -106,7 +115,8 @@ class ProductService
             'product' => $product,
             'variants' => array_values($variants), // Chuyển về mảng tuần tự
             'options' => $options, // Ví dụ: ['Size' => ['40', '41'], 'Màu sắc' => ['Đen', 'Trắng']]
-            'reviews' => $reviews //  các đánh giá đã được duyệt
+            'reviews' => $reviews, //  các đánh giá đã được duyệt
+            'relatedProducts' => $relatedProducts
         ];
     }
     public function updateProduct($id, $data)
