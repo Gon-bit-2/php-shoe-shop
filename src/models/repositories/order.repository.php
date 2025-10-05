@@ -150,4 +150,54 @@ class OrderRepository
         // Dùng FETCH_CLASS với Product vì chúng ta đang lấy thông tin sản phẩm
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
     }
+    ////
+    /**
+     * Lấy các số liệu thống kê tổng quan cho dashboard.
+     */
+
+    public function getDashboardStats()
+    {
+        // Chỉ tính doanh thu từ các đơn hàng đã hoàn thành
+        $query = "SELECT
+                    -- 1. Tổng doanh thu
+                    (SELECT SUM(total_amount) FROM orders WHERE status = 'completed') as total_revenue,
+                     -- 1.1 Tổng doanh thu trong ngày
+                    (SELECT SUM(total_amount) FROM orders WHERE DATE(created_at) = CURDATE() AND status = 'completed') as today_revenue,
+                    -- 1.2 Tổng doanh thu trong tháng
+                    (SELECT SUM(total_amount) FROM orders WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m') AND status = 'completed') as month_revenue,
+                    -- 2. Số đơn hàng mới trong ngày hôm nay
+                    (SELECT COUNT(id) FROM orders WHERE DATE(created_at) = CURDATE()) as today_orders,
+
+                    -- 3. Số đơn hàng đang chờ xử lý
+                    (SELECT COUNT(id) FROM orders WHERE status = 'pending') as pending_orders,
+
+                    -- 4. Tổng số khách hàng (đã đăng ký)
+                    (SELECT COUNT(id) FROM users WHERE role_id = 2) as total_customers";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_OBJ); // Trả về một đối tượng chứa tất cả các số liệu
+    }
+
+    /**
+     * Tìm các sản phẩm bán chạy nhất.
+     */
+    public function getTopSellingProducts($limit = 5)
+    {
+        $query = "SELECT
+                    oi.product_name,
+                    oi.variant_attributes,
+                    SUM(oi.quantity) as total_sold
+                  FROM order_items oi
+                  JOIN orders o ON oi.order_id = o.id
+                  WHERE o.status = 'completed' -- Chỉ tính từ các đơn đã hoàn thành
+                  GROUP BY oi.product_name, oi.variant_attributes
+                  ORDER BY total_sold DESC
+                  LIMIT :limit";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
 }

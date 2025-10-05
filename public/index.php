@@ -7,6 +7,7 @@ require_once '../src/controllers/auth.controller.php';
 require_once '../src/controllers/dashBoard.controller.php';
 require_once '../src/controllers/cart.controller.php';
 require_once '../src/controllers/order.controller.php';
+require_once '../src/controllers/voucher.controller.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -88,6 +89,19 @@ switch ($path) {
     case '/admin/orders':
         $controller = new OrderController($conn);
         $controller->getAllOrders();
+        break;
+    case '/admin/vouchers':
+        $controller = new VoucherController($conn);
+        $controller->index();
+        break;
+    case '/admin/vouchers/create':
+        $controller = new VoucherController($conn);
+        if ($method == 'GET') {
+            $controller->create();
+        } elseif ($method == 'POST') {
+            // Sẽ thêm validation sau
+            $controller->store();
+        }
         break;
     //
     case '/products':

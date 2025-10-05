@@ -13,8 +13,12 @@
                      <a href="/shoe-shop/public/admin/orders" class="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Đơn hàng</a>
                  </div>
                  <div class="ml-10 flex items-baseline space-x-4">
+                     <a href="/shoe-shop/public/admin/vouchers" class="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Mã giảm giá</a>
+                 </div>
+                 <div class="ml-10 flex items-baseline space-x-4">
                      <a href="/shoe-shop/public/admin/users" class="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Người dùng</a>
                  </div>
+
              </div>
 
              <div class="hidden md:block">
