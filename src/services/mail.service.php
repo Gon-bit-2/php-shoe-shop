@@ -1,9 +1,13 @@
 <?php
 
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+$dotenv->load();
+
 require_once __DIR__ . '/../helper/status_helper.php';
 
 class MailService
@@ -45,14 +49,14 @@ class MailService
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'vanthien7027@gmail.com';
-            $mail->Password   = 'yfdy nvto nmww qitm';
+            $mail->Username   = $_ENV['GMAIL_USERNAME'];
+            $mail->Password   = $_ENV['GMAIL_APP_PASSWORD'];
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
             $mail->CharSet    = 'UTF-8';
 
             // Người gửi, người nhận (giữ nguyên)
-            $mail->setFrom('vanthien7027@gmail.com', 'ShoeShop');
+            $mail->setFrom($_ENV['GMAIL_USERNAME'], 'ShoeShop');
             $mail->addAddress($customerEmail, $order->customer_name);
 
             // Nội dung (giữ nguyên)
