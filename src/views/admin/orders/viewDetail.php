@@ -9,6 +9,7 @@
 
 <body class="bg-gray-100">
     <?php require_once __DIR__ . '/../partials/navbar.php'; ?>
+    <?php require_once __DIR__ . '/../../../helper/status_helper.php'; ?>
     <div class="container mx-auto mt-10 p-8">
         <h1 class="text-3xl font-bold mb-6">Chi tiết Đơn hàng #<?= htmlspecialchars($orderDetails->order->id) ?></h1>
 
@@ -27,7 +28,7 @@
                 <?php endif; ?>
 
                 <h2 class="text-xl font-bold mt-6 mb-4 border-b pb-2">Trạng thái Đơn hàng</h2>
-                <p>Trạng thái hiện tại: <strong><?= htmlspecialchars(ucfirst($orderDetails->order->status)) ?></strong></p>
+                <p>Trạng thái hiện tại: <strong><?= translateOrderStatus($orderDetails->order->status) ?></strong></p>
                 <form action="/shoe-shop/public/admin/orders/update-status/<?= $orderDetails->order->id ?>" method="POST" class="mt-4">
                     <label for="status" class="block text-gray-700 font-medium mb-2">Thay đổi trạng thái:</label>
                     <div class="flex">

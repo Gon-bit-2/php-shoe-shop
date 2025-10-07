@@ -9,6 +9,7 @@
 
 <body class="bg-gray-100">
     <?php require_once __DIR__ . '/../partials/navbar.php'; ?>
+    <?php require_once __DIR__ . '/../../../helper/status_helper.php'; ?>
     <div class="container mx-auto mt-10 p-8">
         <h1 class="text-3xl font-bold mb-6">Danh sách Đơn hàng</h1>
 
@@ -42,9 +43,9 @@
                                     <p class="text-gray-900 font-semibold whitespace-no-wrap"><?= number_format($order->total_amount) ?> VNĐ</p>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                                    <span class="relative inline-block px-3 py-1 font-semibold text-orange-900 leading-tight">
-                                        <span aria-hidden class="absolute inset-0 bg-orange-200 opacity-50 rounded-full"></span>
-                                        <span class="relative"><?= htmlspecialchars(ucfirst($order->status)) ?></span>
+                                    <span class="relative inline-block px-3 py-1 font-semibold leading-tight <?= getStatusColorClass($order->status) ?>">
+                                        <span aria-hidden class="absolute inset-0 opacity-50 rounded-full"></span>
+                                        <span class="relative"><?= translateOrderStatus($order->status) ?></span>
                                     </span>
                                 </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">

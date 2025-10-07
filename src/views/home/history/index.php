@@ -9,7 +9,7 @@
 
 <body class="bg-gray-100">
     <?php require_once __DIR__ . '/../../layout/header.php'; ?>
-
+    <?php require_once __DIR__ . '/../../../helper/status_helper.php'; ?>
     <main class="container mx-auto px-6 py-12">
         <h1 class="text-3xl font-bold text-center mb-8">Lịch sử Mua hàng</h1>
 
@@ -55,25 +55,9 @@
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm"><?= date('d/m/Y H:i', strtotime($order->created_at)) ?></td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-right font-semibold"><?= number_format($order->total_amount) ?> VNĐ</td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-center">
-                                    <span class="relative inline-block px-3 py-1 font-semibold text-green-900 leading-tight">
-                                        <span aria-hidden class="absolute inset-0
-                                            <?php
-                                            switch ($order->status) {
-                                                case 'completed':
-                                                    echo 'bg-green-200';
-                                                    break;
-                                                case 'cancelled':
-                                                    echo 'bg-red-200';
-                                                    break;
-                                                case 'shipped':
-                                                    echo 'bg-blue-200';
-                                                    break;
-                                                default:
-                                                    echo 'bg-yellow-200';
-                                            }
-                                            ?>
-                                            opacity-50 rounded-full"></span>
-                                        <span class="relative"><?= htmlspecialchars(ucfirst($order->status)) ?></span>
+                                    <span class="relative inline-block px-3 py-1 font-semibold leading-tight <?= getStatusColorClass($order->status) ?>">
+                                        <span aria-hidden class="absolute inset-0 opacity-50 rounded-full"></span>
+                                        <span class="relative"><?= translateOrderStatus($order->status) ?></span>
                                     </span>
                                 </td>
                             </tr>

@@ -41,7 +41,7 @@ function buildFilterUrl($newParams)
                     <h3 class="text-xl font-bold mt-8 mb-4 border-b pb-2">Lọc theo Giá</h3>
                     <ul>
                         <li class="mb-2">
-                            <a href="<?= buildFilterUrl(['price' => '0-500000']) ?>" class="text-gray-700 hover:text-indigo-600 transition">Dưới 500,000 VNĐ</a>
+                            <a href="<?= buildFilterUrl(['price' => '0-500000']) ?>" class="text-gray-700  hover:text-indigo-600 transition">Dưới 500,000 VNĐ</a>
                         </li>
                         <li class="mb-2">
                             <a href="<?= buildFilterUrl(['price' => '500000-1000000']) ?>" class="text-gray-700 hover:text-indigo-600 transition">500,000 - 1,000,000 VNĐ</a>

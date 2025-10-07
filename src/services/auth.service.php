@@ -37,4 +37,12 @@ class AuthService
         // }
         return (object)['message' => 'Đăng nhập thành công', 'status' => true, 'user' => $user];
     }
+    function forgotPassword($email)
+    {
+        $user = $this->userRepository->findUserByEmail($email);
+        if (!$user) {
+            return (object)['message' => 'Email không tồn tại', 'status' => false];
+        }
+        return (object)['message' => 'Đã gửi email khôi phục mật khẩu', 'status' => true];
+    }
 }

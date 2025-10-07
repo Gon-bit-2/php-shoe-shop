@@ -3,7 +3,7 @@
         <a href="/shoe-shop/public/" class="text-2xl font-bold text-gray-800">ShoeShop</a>
         <nav class="hidden md:flex space-x-6 items-center">
             <a href="/shoe-shop/public/" class="text-gray-600 hover:text-indigo-600">Trang Chủ</a>
-            <a href="#" class="text-gray-600 hover:text-indigo-600">Sản Phẩm</a>
+            <a href="/shoe-shop/public/products" class="text-gray-600 hover:text-indigo-600">Sản Phẩm</a>
             <a href="#" class="text-gray-600 hover:text-indigo-600">Giới Thiệu</a>
             <form action="/shoe-shop/public/products" method="GET" class="relative">
                 <input type="search" name="search" placeholder="Tìm kiếm sản phẩm..." class="py-2 px-4 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64" value="<?= htmlspecialchars($_GET['search'] ?? '') ?>">

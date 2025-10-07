@@ -1660,6 +1660,11 @@ video {
   --tw-ring-offset-width: 2px;
 }
 
+.active\:text-indigo-600:active {
+  --tw-text-opacity: 1;
+  color: rgb(79 70 229 / var(--tw-text-opacity, 1));
+}
+
 .disabled\:cursor-not-allowed:disabled {
   cursor: not-allowed;
 }

@@ -183,7 +183,7 @@ class ProductRepository
         try {
             $this->conn->beginTransaction();
 
-            // Bước 1: Cập nhật thông tin sản phẩm chính
+            // Cập nhật thông tin sản phẩm chính
             $query = "UPDATE products SET
                     name = :name,
                     slug = :slug,
@@ -200,7 +200,7 @@ class ProductRepository
             $stmt->bindParam(":is_active", $product->is_active);
             $stmt->execute();
 
-            // Bước 2: Cập nhật danh mục (xóa cũ, thêm mới)
+            //Cập nhật danh mục (xóa cũ, thêm mới)
             $this->conn->prepare("DELETE FROM product_category_map WHERE product_id = ?")->execute([$product->id]);
             if (!empty($categoryIDs)) {
                 $mapQuery = "INSERT INTO product_category_map (product_id, category_id) VALUES (?, ?)";
@@ -210,7 +210,7 @@ class ProductRepository
                 }
             }
 
-            // Bước 3: Đồng bộ hóa các biến thể (phần phức tạp nhất)
+            //Đồng bộ hóa các biến thể
             $existingVariantIds = $this->getVariantIdsByProductId($product->id);
             $submittedVariantIds = [];
 
@@ -238,7 +238,7 @@ class ProductRepository
                 }
             }
 
-            // C. Tìm và xóa các biến thể đã bị admin xóa khỏi form
+            //Tìm và xóa các biến thể đã bị admin xóa khỏi form
             $variantsToDelete = array_diff($existingVariantIds, $submittedVariantIds);
             if (!empty($variantsToDelete)) {
                 $deleteQuery = "DELETE FROM product_variants WHERE id IN (" . implode(',', array_fill(0, count($variantsToDelete), '?')) . ")";
@@ -269,13 +269,13 @@ class ProductRepository
         $categoryId = $filters['category'] ?? null;
         $priceRange = $filters['price'] ?? null;
 
-        // **TRUY VẤN ĐÃ SỬA ĐỔI BẮT ĐẦU TỪ ĐÂY**
-        // Chúng ta chọn p.* và thêm một trường mới 'price' là giá MIN từ các biến thể
+
+        //  chọn p.* và thêm một trường mới 'price' là giá MIN từ các biến thể
         $query = "SELECT p.*, MIN(pv.price) as price
               FROM products p
               LEFT JOIN product_category_map pcm ON p.id = pcm.product_id
               LEFT JOIN categories c ON pcm.category_id = c.id
-              -- Quan trọng: JOIN với product_variants để lấy giá
+              --  JOIN với product_variants để lấy giá
               LEFT JOIN product_variants pv ON p.id = pv.product_id
               WHERE p.is_active = 1";
         // **TRUY VẤN ĐÃ SỬA ĐỔI KẾT THÚC TẠI ĐÂY**
@@ -367,7 +367,7 @@ class ProductRepository
     }
     public function findRelatedProducts($categoryIDs, $currentProductId, $limit = 4)
     {
-        // Đảm bảo $categoryIDs là một mảng và không rỗng
+        // check $categoryIDs
         if (empty($categoryIDs) || !is_array($categoryIDs)) {
             return [];
         }
@@ -393,7 +393,7 @@ class ProductRepository
         $stmt = $this->conn->prepare($query);
 
         // PDO không thể bindParam với limit
-        // Bắt đầu bind từ index 1
+        // bind từ index 1
         foreach ($params as $key => $value) {
             $stmt->bindValue($key + 1, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
         }

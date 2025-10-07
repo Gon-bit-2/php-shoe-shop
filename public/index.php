@@ -185,6 +185,13 @@ switch ($path) {
             }
             break;
         }
+        // admin order success
+        if (preg_match('/^\/order-success\/(\d+)$/', $path, $matches)) {
+            $controller = new OrderController($conn);
+            $orderId = $matches[1];
+            $controller->showOrderSuccessPage($orderId);
+            break;
+        }
         // admin delete product
         if (preg_match('/^\/admin\/products\/delete\/(\d+)$/', $path, $matches)) {
             if ($method == 'POST') {

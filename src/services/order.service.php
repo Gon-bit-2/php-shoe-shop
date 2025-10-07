@@ -1,23 +1,23 @@
 <?php
 require_once __DIR__ . '/../models/repositories/order.repository.php';
 require_once __DIR__ . '/../services/cart.service.php';
-
+require_once __DIR__ . '/../services/mail.service.php';
 class OrderService
 {
     private $orderRepository;
     private $cartService;
     private $conn;
-
+    private $mailService;
     public function __construct($conn)
     {
         $this->conn = $conn;
         $this->orderRepository = new OrderRepository($conn);
         $this->cartService = new CartService($conn);
+        $this->mailService = new MailService($conn);
     }
 
     public function createOrder($userId, $customerName, $customerPhone, $customerAddress, $paymentMethod)
     {
-        // THAY ĐỔI 1: Lấy tất cả chi tiết giỏ hàng, bao gồm cả voucher
         $cartDetails = $this->cartService->getFinalCartDetails();
 
         if (empty($cartDetails->items)) {
@@ -27,36 +27,41 @@ class OrderService
         try {
             $this->conn->beginTransaction();
 
-            // THAY ĐỔI 2: Truyền vào tổng tiền cuối cùng và thông tin voucher
             $orderId = $this->orderRepository->createOrderRecord(
                 $userId,
                 $customerName,
                 $customerPhone,
                 $customerAddress,
-                $cartDetails->final_total, // Sử dụng final_total
+                $cartDetails->final_total,
                 $paymentMethod,
-                $cartDetails->voucher_code, // Thêm voucher_code
-                $cartDetails->discount // Thêm discount_amount
+                $cartDetails->voucher_code,
+                $cartDetails->discount
             );
 
             if (!$orderId) {
                 throw new Exception("Không thể tạo đơn hàng.");
             }
 
-            // Cập nhật kho và lưu các mục đơn hàng (giữ nguyên)
             foreach ($cartDetails->items as $variantId => $item) {
                 $this->orderRepository->updateVariantStock($variantId, $item->quantity);
                 $this->orderRepository->createOrderItemRecord($orderId, $variantId, $item);
             }
 
-            // THAY ĐỔI 3: Nếu có voucher, tăng số lượt sử dụng
             if ($cartDetails->voucher_code) {
-                $voucherRepo = new VoucherRepository($this->conn); // Tạo instance mới
+                // Chúng ta cần require_once repository ở đây vì nó không được nạp tự động
+                require_once __DIR__ . '/../models/repositories/voucher.repository.php';
+                $voucherRepo = new VoucherRepository($this->conn);
                 $voucherRepo->incrementUsedCount($cartDetails->voucher_code);
             }
 
             $this->conn->commit();
             $this->cartService->clearCart();
+
+            // Gửi email xác nhận ngay sau khi tạo đơn hàng thành công với trạng thái 'pending'
+            // 1. Lấy chi tiết đơn hàng vừa tạo
+            $orderDetails = $this->getOrderDetail($orderId);
+            // 2. Gửi chi tiết đó cho MailService
+            $this->mailService->sendOrderStatusEmail($orderDetails);
 
             return ['success' => true, 'order_id' => $orderId];
         } catch (Exception $e) {
@@ -86,14 +91,25 @@ class OrderService
     public function updateOrderStatus($orderId, $newStatus)
     {
         $allowedStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
-
-        // Kiểm tra xem trạng thái mới có nằm trong danh sách được phép hay không
         if (!in_array($newStatus, $allowedStatuses)) {
             return false;
         }
 
-        // Nếu hợp lệ, gọi repository để cập nhật
-        return $this->orderRepository->updateStatus($orderId, $newStatus);
+        // Lấy trạng thái cũ trước khi cập nhật
+        $orderBeforeUpdate = $this->orderRepository->findOrderById($orderId);
+        $oldStatus = $orderBeforeUpdate ? $orderBeforeUpdate->status : null;
+
+        $result = $this->orderRepository->updateStatus($orderId, $newStatus);
+
+        // Chỉ gửi email nếu cập nhật thành công VÀ trạng thái thực sự thay đổi
+        if ($result && $newStatus !== $oldStatus && in_array($newStatus, ['shipped', 'completed', 'cancelled'])) {
+            // 1. Lấy chi tiết đơn hàng sau khi cập nhật
+            $orderDetails = $this->getOrderDetail($orderId);
+            // 2. Gửi chi tiết đó cho MailService
+            $this->mailService->sendOrderStatusEmail($orderDetails);
+        }
+
+        return $result;
     }
     //
     public function getOrdersByUserId($userId)

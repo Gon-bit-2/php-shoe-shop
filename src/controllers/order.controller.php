@@ -46,8 +46,7 @@ class OrderController
             // Sau này, bạn có thể kiểm tra $paymentMethod ở đây
             // Nếu là 'bank_transfer', chuyển hướng đến trang hướng dẫn thanh toán
             // Nếu là 'cod', chuyển hướng đến trang cảm ơn
-            echo "<h1>Đặt hàng thành công!</h1><p>Cảm ơn bạn đã mua hàng. Mã đơn hàng của bạn là: " . $result['order_id'] . "</p>";
-            echo '<a href="/shoe-shop/public/">Quay lại trang chủ</a>';
+            header('Location: /shoe-shop/public/order-success/' . $result['order_id']);
             exit();
         } else {
             $this->showCheckoutForm($result['message']);
@@ -98,5 +97,16 @@ class OrderController
 
         // Nạp view và truyền cả 2 biến sang
         require_once __DIR__ . '/../views/home/history/index.php';
+    }
+    public function showOrderSuccessPage($orderId)
+    {
+        // Lấy chi tiết đơn hàng để hiển thị
+        $order = $this->orderService->getOrderDetail($orderId)->order;
+        if (!$order) {
+            // Xử lý nếu không tìm thấy đơn hàng
+            header('Location: /shoe-shop/public/');
+            exit();
+        }
+        require_once __DIR__ . '/../views/home/orders/success.php';
     }
 }

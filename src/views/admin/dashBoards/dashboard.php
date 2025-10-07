@@ -66,7 +66,9 @@
                     </svg>
                 </div>
                 <div>
-                    <p class="text-sm text-gray-500">Đơn hàng chờ xử lý</p>
+                    <a href="/shoe-shop/public/admin/orders">
+                        <p class="text-sm text-gray-500">Đơn hàng chờ xử lý</p>
+                    </a>
                     <p class="text-2xl font-bold"><?= $dashboardData->stats->pending_orders ?? 0 ?></p>
                 </div>
             </div>
