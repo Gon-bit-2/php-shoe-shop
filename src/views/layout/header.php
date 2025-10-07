@@ -30,7 +30,7 @@
                             Chào, <strong><?= htmlspecialchars($_SESSION['user']['fullname']) ?></strong>
                         </div>
                         <div class="border-t border-gray-100"></div>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Thông tin người dùng</a>
+                        <a href="/shoe-shop/public/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Thông tin người dùng</a>
                         <a href="/shoe-shop/public/cart" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Giỏ hàng</a>
                         <a href="/shoe-shop/public/history" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Lịch sử mua hàng</a>
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem">Đổi mật khẩu</a>

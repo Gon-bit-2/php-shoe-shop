@@ -33,6 +33,9 @@
             <div>
                 <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-300">Đăng nhập</button>
             </div>
+            <div class="text-right mt-4">
+                <a href="/shoe-shop/public/forgot-password" class="text-sm text-blue-600 hover:underline">Quên mật khẩu?</a>
+            </div>
         </form>
 
         <p class="text-center mt-6 text-gray-600">

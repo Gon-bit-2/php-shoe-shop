@@ -60,4 +60,60 @@ class AuthController
         header('Location: /shoe-shop/public/');
         exit();
     }
+    public function showForgotPasswordForm()
+    {
+        require_once __DIR__ . '/../views/auth/forgot_password.php';
+    }
+
+    public function handleForgotPassword()
+    {
+        $email = $_POST['email'] ?? '';
+        $this->authService->initiatePasswordReset($email);
+
+        // Luôn hiển thị thông báo chung để bảo mật
+        $_SESSION['forgot_message'] = 'Nếu email của bạn tồn tại trong hệ thống, một liên kết đặt lại mật khẩu đã được gửi đến.';
+        header('Location: /shoe-shop/public/forgot-password');
+        exit();
+    }
+
+    public function showResetPasswordForm()
+    {
+        $token = $_GET['token'] ?? '';
+        $user = $this->authService->verifyResetToken($token);
+
+        if (!$user) {
+            // Token không hợp lệ hoặc hết hạn
+            echo "<h1>Lỗi</h1><p>Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn. Vui lòng thử lại.</p>";
+            exit();
+        }
+
+        // Token hợp lệ, hiển thị form
+        require_once __DIR__ . '/../views/auth/reset_password.php';
+    }
+
+    public function handleResetPassword()
+    {
+        $token = $_POST['token'] ?? '';
+        $password = $_POST['password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        if ($password !== $confirmPassword) {
+            // Load lại form với thông báo lỗi
+            $_SESSION['reset_error'] = 'Mật khẩu xác nhận không khớp.';
+            header('Location: /shoe-shop/public/reset-password?token=' . $token);
+            exit();
+        }
+
+        $result = $this->authService->resetPassword($token, $password);
+
+        if ($result['success']) {
+            $_SESSION['login_message'] = 'Mật khẩu đã được thay đổi thành công. Vui lòng đăng nhập lại.';
+            header('Location: /shoe-shop/public/login');
+            exit();
+        } else {
+            $_SESSION['reset_error'] = $result['message'];
+            header('Location: /shoe-shop/public/reset-password?token=' . $token);
+            exit();
+        }
+    }
 }

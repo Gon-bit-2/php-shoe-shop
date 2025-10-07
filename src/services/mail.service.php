@@ -4,15 +4,14 @@
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require_once __DIR__ . '/../vendor/autoload.php';
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
+require_once __DIR__ . '/../../vendor/autoload.php';
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../');
 $dotenv->load();
 
 require_once __DIR__ . '/../helper/status_helper.php';
 
 class MailService
 {
-    // Bỏ hết các thuộc tính và hàm __construct() cũ
 
     public function sendOrderStatusEmail($orderDetails) // THAY ĐỔI: Nhận thẳng dữ liệu, không cần $orderId
     {
@@ -45,7 +44,6 @@ class MailService
 
         $mail = new PHPMailer(true);
         try {
-            // Cấu hình Server (giữ nguyên)
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
@@ -85,6 +83,46 @@ class MailService
             $emailBody .= "<p style='text-align:right; font-size:1.2em;'><strong>Tổng cộng: " . number_format($order->total_amount) . " VNĐ</strong></p>";
             $emailBody .= "<p>Chúng tôi sẽ tiếp tục cập nhật trạng thái đơn hàng cho bạn. Cảm ơn!</p>";
             $mail->Body = $emailBody;
+
+            $mail->send();
+            return true;
+        } catch (Exception $e) {
+            error_log("Mailer Error: {$mail->ErrorInfo}");
+            return false;
+        }
+    }
+    public function sendPasswordResetEmail($recipientEmail, $recipientName, $token)
+    {
+        // Link này trỏ đến trang reset mật khẩu trên web của bạn
+        $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/shoe-shop/public/reset-password?token=" . $token;
+
+        $mail = new PHPMailer(true);
+
+        try {
+            // Cấu hình server (giữ nguyên)
+            $mail->isSMTP();
+            $mail->Host       = 'smtp.gmail.com';
+            $mail->SMTPAuth   = true;
+            $mail->Username   = $_ENV['GMAIL_USERNAME'];
+            $mail->Password   = $_ENV['GMAIL_APP_PASSWORD'];
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port       = 587;
+            $mail->CharSet    = 'UTF-8';
+
+            // Người gửi, người nhận
+            $mail->setFrom($_ENV['GMAIL_USERNAME'], 'ShoeShop');
+            $mail->addAddress($recipientEmail, $recipientName);
+
+            // Nội dung
+            $mail->isHTML(true);
+            $mail->Subject = 'Yêu cầu đặt lại mật khẩu tài khoản ShoeShop';
+            $mail->Body    = "
+                <h1>Yêu cầu đặt lại mật khẩu</h1>
+                <p>Xin chào " . htmlspecialchars($recipientName) . ",</p>
+                <p>Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản của bạn. Vui lòng nhấp vào liên kết bên dưới để tạo mật khẩu mới. Liên kết này sẽ hết hạn sau 1 giờ.</p>
+                <p><a href='" . $resetLink . "' style='background-color:#007bff; color:white; padding:10px 20px; text-decoration:none; border-radius:5px;'>Đặt lại mật khẩu</a></p>
+                <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này.</p>
+            ";
 
             $mail->send();
             return true;

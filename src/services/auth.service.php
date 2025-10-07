@@ -1,12 +1,15 @@
 <?php
 require_once '../src/models/repositories/user.repository.php';
 require_once '../src/models/user.php';
+require_once '../src/services/mail.service.php';
 class AuthService
 {
     private $userRepository;
+    private $mailService;
     public function __construct($conn)
     {
         $this->userRepository = new UserRepository($conn);
+        $this->mailService = new MailService();
     }
     function register($fullname, $email, $password)
     {
@@ -44,5 +47,47 @@ class AuthService
             return (object)['message' => 'Email không tồn tại', 'status' => false];
         }
         return (object)['message' => 'Đã gửi email khôi phục mật khẩu', 'status' => true];
+    }
+    public function initiatePasswordReset($email)
+    {
+        $user = $this->userRepository->findUserByEmail($email);
+        if (!$user) {
+            // Vẫn trả về thành công để tránh lộ thông tin email nào tồn tại
+            return ['success' => true];
+        }
+
+        // Tạo một token ngẫu nhiên, an toàn
+        $token = bin2hex(random_bytes(32));
+
+        // Đặt thời gian hết hạn (ví dụ: 1 giờ kể từ bây giờ)
+        $expiresAt = date('Y-m-d H:i:s', time() + 3600);
+
+        // Lưu token vào database
+        $this->userRepository->saveResetToken($user->id, $token, $expiresAt);
+
+        // Gửi email chứa link reset
+        $this->mailService->sendPasswordResetEmail($user->email, $user->fullname, $token);
+
+        return ['success' => true];
+    }
+
+    public function verifyResetToken($token)
+    {
+        return $this->userRepository->findByResetToken($token);
+    }
+
+    public function resetPassword($token, $newPassword)
+    {
+        $user = $this->verifyResetToken($token);
+        if (!$user) {
+            return ['success' => false, 'message' => 'Mã token không hợp lệ hoặc đã hết hạn.'];
+        }
+
+        $result = $this->userRepository->resetPassword($user->id, $newPassword);
+        if ($result) {
+            return ['success' => true, 'message' => 'Mật khẩu đã được đặt lại thành công.'];
+        }
+
+        return ['success' => false, 'message' => 'Có lỗi xảy ra, vui lòng thử lại.'];
     }
 }

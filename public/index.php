@@ -8,6 +8,7 @@ require_once '../src/controllers/dashBoard.controller.php';
 require_once '../src/controllers/cart.controller.php';
 require_once '../src/controllers/order.controller.php';
 require_once '../src/controllers/voucher.controller.php';
+require_once '../src/controllers/user.controller.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -62,6 +63,33 @@ switch ($path) {
     case '/logout':
         $controller = new AuthController($conn);
         $controller->logout();
+        break;
+    // user
+    case '/profile':
+        $authMiddleware->requireAuth(); // Bắt buộc đăng nhập
+        $controller = new UserController($conn);
+        if ($method == 'GET') {
+            $controller->showProfile();
+        } elseif ($method == 'POST') {
+            $controller->updateProfile();
+        }
+        break;
+    case '/forgot-password':
+        $controller = new AuthController($conn);
+        if ($method == 'GET') {
+            $controller->showForgotPasswordForm();
+        } elseif ($method == 'POST') {
+            $controller->handleForgotPassword();
+        }
+        break;
+
+    case '/reset-password':
+        $controller = new AuthController($conn);
+        if ($method == 'GET') {
+            $controller->showResetPasswordForm();
+        } elseif ($method == 'POST') {
+            $controller->handleResetPassword();
+        }
         break;
     // admin
     case '/admin':

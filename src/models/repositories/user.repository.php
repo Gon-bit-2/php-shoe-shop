@@ -60,4 +60,77 @@ class UserRepository
         }
         return false;
     }
+    public function findAll()
+    {
+        $query = "SELECT u.id, u.fullname, u.email, u.role_id, u.is_active, r.name as role_name
+                  FROM " . $this->table . " u
+                  JOIN roles r ON u.role_id = r.id
+                  ORDER BY u.created_at DESC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_OBJ);
+    }
+
+    public function findById($id)
+    {
+        // Câu lệnh này sẽ lấy cả mật khẩu, cần thiết cho việc đổi mật khẩu
+        $query = "SELECT * FROM " . $this->table . " WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':id' => $id]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'User');
+        return $stmt->fetch();
+    }
+
+    public function update(User $user)
+    {
+        // Tách biệt việc cập nhật mật khẩu để an toàn hơn
+        if (property_exists($user, 'password') && !empty($user->password) && strlen($user->password) < 60) {
+            // Giả định mật khẩu chưa hash sẽ ngắn hơn 60 ký tự
+            $user->password = password_hash($user->password, PASSWORD_DEFAULT);
+        }
+
+        $query = "UPDATE " . $this->table . "
+                  SET fullname = :fullname, email = :email, role_id = :role_id, is_active = :is_active"
+            . (!empty($user->password) ? ", password = :password" : "") . // Chỉ thêm password vào câu query nếu có
+            " WHERE id = :id";
+
+        $stmt = $this->conn->prepare($query);
+
+        $params = [
+            ':id' => $user->id,
+            ':fullname' => $user->fullname,
+            ':email' => $user->email,
+            ':role_id' => $user->role_id,
+            ':is_active' => $user->is_active
+        ];
+
+        if (!empty($user->password)) {
+            $params[':password'] = $user->password;
+        }
+
+        return $stmt->execute($params);
+    }
+    public function saveResetToken($userId, $token, $expiresAt)
+    {
+        $query = "UPDATE " . $this->table . " SET reset_token = :token, reset_token_expires_at = :expires_at WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        return $stmt->execute([':token' => $token, ':expires_at' => $expiresAt, ':id' => $userId]);
+    }
+
+    public function findByResetToken($token)
+    {
+        $query = "SELECT * FROM " . $this->table . " WHERE reset_token = :token AND reset_token_expires_at > NOW() LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute([':token' => $token]);
+        $stmt->setFetchMode(PDO::FETCH_CLASS, 'User');
+        return $stmt->fetch();
+    }
+
+    public function resetPassword($userId, $newPassword)
+    {
+        $query = "UPDATE " . $this->table . " SET password = :password, reset_token = NULL, reset_token_expires_at = NULL WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+        return $stmt->execute([':password' => $hashedPassword, ':id' => $userId]);
+    }
 }
