@@ -1,4 +1,5 @@
 <?php
+date_default_timezone_set('Asia/Ho_Chi_Minh');
 require_once '../src/models/repositories/database.php';
 require_once '../src/middleware/auth.middleware.php';
 require_once '../src/middleware/product.middleware.php';
@@ -268,7 +269,8 @@ switch ($path) {
             }
             break;
         }
-        echo "404 - Trang không tồn tại";
+        http_response_code(404);
+        require_once __DIR__ . '/../src/views/errors/404.php';
         break;
         //
 

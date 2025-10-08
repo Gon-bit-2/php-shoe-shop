@@ -55,8 +55,7 @@ class AuthMiddleware
         // 3. Kiểm tra vai trò trong session
         if (!isset($_SESSION['user']['role_id']) || $_SESSION['user']['role_id'] != 1) {
             http_response_code(403);
-            echo "<h1>403 Forbidden</h1>";
-            echo "Bạn không có quyền truy cập vào trang này.";
+            require_once __DIR__ . '/../views/errors/403.php';
             exit();
         }
     }

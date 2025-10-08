@@ -28,7 +28,7 @@
                 <?php if (!empty($categories)): ?>
                     <?php $featuredCategories = array_slice($categories, 0, 4); ?>
                     <?php foreach ($featuredCategories as $category): ?>
-                        <a href="#" class="relative rounded-lg overflow-hidden group">
+                        <a href="/shoe-shop/public/products?category=<?= $category->id ?>" class="relative rounded-lg overflow-hidden group">
                             <img src="<?= htmlspecialchars($category->image_url) ?>" alt="<?= htmlspecialchars($category->name) ?>" class="w-full h-48 object-cover">
                             <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                                 <h3 class="text-white text-2xl font-bold group-hover:scale-110 transition-transform duration-300"><?= htmlspecialchars($category->name) ?></h3>
