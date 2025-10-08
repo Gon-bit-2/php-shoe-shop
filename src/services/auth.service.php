@@ -14,7 +14,7 @@ class AuthService
     function register($fullname, $email, $password)
     {
         //1.check email
-        if ($this->userRepository->findByEmail($email)) {
+        if ($this->userRepository->findUserByEmail($email)) {
             return ['message' => 'Email đã tồn tại', 'status' => false];
         }
         //2.create user
