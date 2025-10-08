@@ -13,6 +13,11 @@ require_once __DIR__ . '/../helper/status_helper.php';
 class MailService
 {
 
+    /**
+     * Gửi email thông báo trạng thái đơn hàng
+     * @param mixed $orderDetails
+     * @return bool
+     */
     public function sendOrderStatusEmail($orderDetails) // THAY ĐỔI: Nhận thẳng dữ liệu, không cần $orderId
     {
         if (!$orderDetails || !$orderDetails->status) return false;
@@ -38,6 +43,10 @@ class MailService
                 $subject = 'Đơn hàng #' . $order->id . ' đã giao thành công';
                 $bodyHeader = '<h1>Chúc mừng! Đơn hàng đã giao thành công!</h1><p>Cảm ơn bạn đã mua sắm tại ShoeShop.</p>';
                 break;
+            case 'cancelled':
+                $subject = 'Đơn hàng #' . $order->id . ' đã bị hủy';
+                $bodyHeader = '<h1>Đơn hàng đã bị hủy!</h1><p>Đơn hàng của bạn đã bị hủy. Vui lòng liên hệ với chúng tôi để biết thêm chi tiết.</p>';
+                break;
             default:
                 return false;
         }
@@ -52,17 +61,12 @@ class MailService
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
             $mail->CharSet    = 'UTF-8';
-
-            // Người gửi, người nhận (giữ nguyên)
             $mail->setFrom($_ENV['GMAIL_USERNAME'], 'ShoeShop');
             $mail->addAddress($customerEmail, $order->customer_name);
-
-            // Nội dung (giữ nguyên)
             $mail->isHTML(true);
             $mail->Subject = $subject;
             $emailBody = "<h2>Xin chào " . htmlspecialchars($order->customer_name) . ",</h2>";
             $emailBody .= $bodyHeader;
-            // ... (phần code tạo bảng chi tiết sản phẩm giữ nguyên) ...
             $emailBody .= "<h3>Chi tiết đơn hàng:</h3>";
             $emailBody .= "<table border='1' cellpadding='10' cellspacing='0' style='width:100%; border-collapse: collapse;'>";
             $emailBody .= "<tr style='background-color:#f2f2f2;'><th>Sản phẩm</th><th>Số lượng</th><th>Giá</th><th>Thành tiền</th></tr>";
@@ -91,6 +95,13 @@ class MailService
             return false;
         }
     }
+    /**
+     * Gửi email thông báo đặt lại mật khẩu
+     * @param mixed $recipientEmail
+     * @param mixed $recipientName
+     * @param mixed $token
+     * @return bool
+     */
     public function sendPasswordResetEmail($recipientEmail, $recipientName, $token)
     {
         // Link này trỏ đến trang reset mật khẩu trên web của bạn

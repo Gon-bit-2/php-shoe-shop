@@ -7,6 +7,42 @@ class UserController
     {
         $this->userRepository = new UserRepository($conn);
     }
+    public function index()
+    {
+        $users = $this->userRepository->findAll();
+        require_once __DIR__ . '/../views/admin/users/index.php';
+    }
+
+    public function edit($id)
+    {
+        $user = $this->userRepository->findById($id);
+        if (!$user) {
+            // Xử lý lỗi
+            echo "404 - Người dùng không tồn tại";
+            exit();
+        }
+        require_once __DIR__ . '/../views/admin/users/edit.php';
+    }
+
+    public function update($id)
+    {
+        $user = $this->userRepository->findById($id);
+        if (!$user) {
+            // Xử lý lỗi
+            echo "404 - Người dùng không tồn tại";
+            exit();
+        }
+
+        $user->fullname = trim($_POST['fullname']);
+        $user->email = trim($_POST['email']);
+        $user->role_id = (int)$_POST['role_id'];
+        $user->is_active = isset($_POST['is_active']) ? 1 : 0;
+
+        $this->userRepository->update($user);
+
+        header('Location: /shoe-shop/public/admin/users');
+        exit();
+    }
     public function showProfile()
     {
         // Lấy ID người dùng từ session

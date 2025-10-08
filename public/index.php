@@ -97,6 +97,10 @@ switch ($path) {
         $controller = new DashBoardController($conn);
         $controller->index();
         break;
+    case '/admin/users':
+        $controller = new UserController($conn);
+        $controller->index();
+        break;
     case '/admin/products':
         $controller = new ProductController($conn);
         $controller->getAllProducts();
@@ -196,6 +200,17 @@ switch ($path) {
         $controller->showPurchaseHistory();
         break;
     default:
+        // admin edit user
+        if (preg_match('/^\/admin\/users\/edit\/(\d+)$/', $path, $matches)) {
+            $controller = new UserController($conn);
+            $userId = $matches[1];
+            if ($method == 'GET') {
+                $controller->edit($userId);
+            } elseif ($method == 'POST') {
+                $controller->update($userId);
+            }
+            break;
+        }
         // admin edit product
         if (preg_match('/^\/admin\/products\/edit\/(\d+)$/', $path, $matches)) {
             $controller = new ProductController($conn);

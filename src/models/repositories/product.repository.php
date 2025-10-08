@@ -379,7 +379,6 @@ class ProductRepository
                   FROM products p
                   JOIN product_category_map pcm ON p.id = pcm.product_id
                   JOIN product_variants pv ON p.id = pv.product_id
-                  -- Sửa điều kiện WHERE để dùng IN với nhiều category
                   WHERE pcm.category_id IN ($placeholders)
                     AND p.id != ? -- Placeholder cho currentProductId
                     AND p.is_active = 1

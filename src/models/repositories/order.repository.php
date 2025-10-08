@@ -91,6 +91,7 @@ class OrderRepository
         $stmt->bindParam(":status", $newStatus);
         $stmt->bindParam(":id", $orderId);
         $stmt->execute();
+        return true;
     }
     //for u
     public function findOrdersByUserId($userId)
