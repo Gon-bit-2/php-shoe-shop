@@ -18,6 +18,9 @@
                  <div class="ml-10 flex items-baseline space-x-4">
                      <a href="/shoe-shop/public/admin/users" class="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Người dùng</a>
                  </div>
+                 <div class="ml-10 flex items-baseline space-x-4">
+                     <a href="/shoe-shop/public/admin/categories" class="text-gray-600 hover:bg-gray-100 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium">Danh mục</a>
+                 </div>
 
              </div>
 

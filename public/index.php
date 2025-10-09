@@ -10,6 +10,7 @@ require_once '../src/controllers/cart.controller.php';
 require_once '../src/controllers/order.controller.php';
 require_once '../src/controllers/voucher.controller.php';
 require_once '../src/controllers/user.controller.php';
+require_once '../src/controllers/category.controller.php';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -136,6 +137,18 @@ switch ($path) {
             $controller->store();
         }
         break;
+    case '/admin/categories':
+        $controller = new CategoryController($conn);
+        $controller->index();
+        break;
+    case '/admin/categories/create':
+        $controller = new CategoryController($conn);
+        if ($method == 'GET') {
+            $controller->create();
+        } elseif ($method == 'POST') {
+            $controller->store();
+        }
+        break;
     //
     case '/products':
         $controller = new ProductController($conn);
@@ -226,6 +239,17 @@ switch ($path) {
                 } else {
                     $controller->update($productId, $_POST);
                 }
+            }
+            break;
+        }
+        //admin edit category
+        if (preg_match('/^\/admin\/categories\/edit\/(\d+)$/', $path, $matches)) {
+            $controller = new CategoryController($conn);
+            $categoryId = $matches[1];
+            if ($method == 'GET') {
+                $controller->edit($categoryId);
+            } elseif ($method == 'POST') {
+                $controller->update($categoryId);
             }
             break;
         }

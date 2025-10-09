@@ -69,10 +69,11 @@ class MailService
             $emailBody .= $bodyHeader;
             $emailBody .= "<h3>Chi tiết đơn hàng:</h3>";
             $emailBody .= "<table border='1' cellpadding='10' cellspacing='0' style='width:100%; border-collapse: collapse;'>";
-            $emailBody .= "<tr style='background-color:#f2f2f2;'><th>Sản phẩm</th><th>Số lượng</th><th>Giá</th><th>Thành tiền</th></tr>";
+            $emailBody .= "<tr style='background-color:#f2f2f2;'><th>Sản phẩm</th><th>Ảnh</th><th>Số lượng</th><th>Giá</th><th>Thành tiền</th></tr>";
             foreach ($items as $item) {
                 $emailBody .= "<tr>";
                 $emailBody .= "<td>" . htmlspecialchars($item->product_name) . "<br><small>" . htmlspecialchars($item->variant_attributes) . "</small></td>";
+                $emailBody .= "<td><img src='" . htmlspecialchars($item->image_url) . "' alt='" . htmlspecialchars($item->product_name) . "' style='width:100px; height:100px;'></td>";
                 $emailBody .= "<td align='center'>" . $item->quantity . "</td>";
                 $emailBody .= "<td align='right'>" . number_format($item->price) . " VNĐ</td>";
                 $emailBody .= "<td align='right'>" . number_format($item->price * $item->quantity) . " VNĐ</td>";
