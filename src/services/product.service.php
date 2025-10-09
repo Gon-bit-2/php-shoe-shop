@@ -190,7 +190,23 @@ class ProductService
     }
     public function getAllProductsActive($filters = [])
     {
-        // Chỉ đơn giản là truyền các bộ lọc xuống cho Repository
-        return $this->productRepository->findWithFilters($filters);
+        $page = isset($filters['page']) && is_numeric($filters['page']) ? (int)$filters['page'] : 1;
+        $productsPerPage = 9;
+        $offset = ($page - 1) * $productsPerPage;
+
+        // Lấy danh sách sản phẩm cho trang hiện tại
+        $products = $this->productRepository->findWithFilters($filters, $productsPerPage, $offset);
+
+        // Đếm tổng số sản phẩm khớp với bộ lọc
+        $totalProducts = $this->productRepository->countWithFilters($filters);
+
+        // Tính tổng số trang
+        $totalPages = ceil($totalProducts / $productsPerPage);
+
+        return [
+            'products' => $products,
+            'totalPages' => $totalPages,
+            'currentPage' => $page
+        ];
     }
 }

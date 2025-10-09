@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../../helper/pagination_helper.php';
 function buildFilterUrl($newParams)
 {
     $queryParams = $_GET;
@@ -83,7 +84,11 @@ function buildFilterUrl($newParams)
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
+                <div class="mt-8">
+                    <?php renderPagination($totalPages, $currentPage, '/shoe-shop/public/products'); ?>
+                </div>
             </div>
+        </div>
         </div>
     </main>
 

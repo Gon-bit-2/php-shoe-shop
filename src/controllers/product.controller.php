@@ -113,7 +113,13 @@ class ProductController
     //method user
     public function getAllProductsActive()
     {
-        $products = $this->productService->getAllProductsActive([]);
+        // 1. Gọi service và nhận về toàn bộ dữ liệu
+        $data = $this->productService->getAllProductsActive([]);
+
+        // 2. Chỉ lấy danh sách sản phẩm từ mảng dữ liệu đó
+        $products = $data['products'];
+
+        // Phần còn lại giữ nguyên
         $categories = $this->productService->getAllCategories();
         require_once __DIR__ . '/../views/home/products/index.php';
     }
@@ -174,19 +180,22 @@ class ProductController
     }
     public function showProductPage()
     {
-        // Lấy các tham số từ URL (phương thức GET)
         $filters = [
             'search' => $_GET['search'] ?? '',
             'category' => $_GET['category'] ?? null,
-            // --- THÊM DÒNG MỚI ---
-            'price' => $_GET['price'] ?? null // Thêm tham số price
+            'price' => $_GET['price'] ?? null,
+            'page' => $_GET['page'] ?? 1 // Lấy số trang từ URL
         ];
 
-        // Gọi service với các bộ lọc (không cần thay đổi gì thêm ở đây)
-        $products = $this->productService->getAllProductsActive($filters);
+        $data = $this->productService->getAllProductsActive($filters);
+
+        // Truyền toàn bộ mảng dữ liệu sang view
+        $products = $data['products'];
+        $totalPages = $data['totalPages'];
+        $currentPage = $data['currentPage'];
+
         $categories = $this->productService->getAllCategories();
 
-        // Nạp view
         require_once __DIR__ . '/../views/home/products/filterPage.php';
     }
     //end

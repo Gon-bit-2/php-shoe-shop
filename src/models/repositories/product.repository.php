@@ -102,8 +102,6 @@ class ProductRepository
         }
     }
 
-    // ---- CÁC HÀM KHÁC (save, findAll,...) GIỮ NGUYÊN ----
-    // ...
     public function findAttributeValuesByName($attributeName)
     {
         // Câu lệnh này JOIN 2 bảng attributes và attribute_values
@@ -261,9 +259,42 @@ class ProductRepository
         $stmt->execute([$productId]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN); // Lấy về mảng các ID
     }
+    public function countWithFilters($filters = [])
+    {
+        $query = "SELECT COUNT(DISTINCT p.id)
+              FROM products p
+              LEFT JOIN product_category_map pcm ON p.id = pcm.product_id
+              LEFT JOIN product_variants pv ON p.id = pv.product_id
+              WHERE p.is_active = 1";
+        $params = [];
 
+        // Thêm các điều kiện lọc
+        if (!empty($filters['search'])) {
+            $query .= " AND p.name LIKE :search";
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+        if (!empty($filters['category'])) {
+            $query .= " AND pcm.category_id = :category_id";
+            $params[':category_id'] = $filters['category'];
+        }
+        if (!empty($filters['price'])) {
+            $priceParts = explode('-', $filters['price']);
+            if (is_numeric($priceParts[0] ?? null)) {
+                $query .= " AND pv.price >= :min_price";
+                $params[':min_price'] = $priceParts[0];
+            }
+            if (is_numeric($priceParts[1] ?? null)) {
+                $query .= " AND pv.price <= :max_price";
+                $params[':max_price'] = $priceParts[1];
+            }
+        }
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
     // Phương thức mới để tìm kiếm và lọc
-    public function findWithFilters($filters = [])
+    public function findWithFilters($filters = [], $limit, $offset)
     {
         $searchTerm = $filters['search'] ?? '';
         $categoryId = $filters['category'] ?? null;
@@ -313,10 +344,19 @@ class ProductRepository
             }
         }
 
-        $query .= " GROUP BY p.id ORDER BY p.created_at DESC";
+        $query .= " GROUP BY p.id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($query);
-        $stmt->execute($params);
+        // Bind all other parameters first
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value);
+        }
+
+        // Bind limit and offset as integers
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
     }
     public function delete($id)
