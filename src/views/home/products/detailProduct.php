@@ -7,7 +7,6 @@
     <title><?= htmlspecialchars($product->name) ?></title>
     <link href="/shoe-shop/public/css/style.css" rel="stylesheet">
     <style>
-        /* CSS tùy chỉnh cho các nút chọn thuộc tính */
         .option-btn {
             cursor: pointer;
             border: 1px solid #d1d5db;
@@ -31,7 +30,6 @@
             text-decoration: line-through;
         }
 
-        /* --- CSS MỚI CHO PHẦN ĐÁNH GIÁ --- */
         .star-rating {
             display: flex;
             flex-direction: row-reverse;
@@ -72,10 +70,10 @@
         <div class="md:flex md:items-start">
             <div class="w-full md:w-1/2">
                 <div class="bg-white rounded-lg shadow-md p-4">
-                    <img id="product-image" class="w-full h-auto object-cover rounded-lg" src="<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>">
+                    <img id="main-product-image" class="w-full h-auto object-cover rounded-lg mb-4" src="<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>">
+
                 </div>
             </div>
-
             <div class="w-full md:w-1/2 md:pl-10 mt-8 md:mt-0">
                 <h1 class="text-4xl font-extrabold text-gray-800 mb-2"><?= htmlspecialchars($product->name) ?></h1>
 
@@ -85,8 +83,11 @@
                 </div>
 
                 <?php if (isset($options['Size'])): ?>
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Size:</h3>
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <h3 class="text-lg font-semibold text-gray-700">Size:</h3>
+                            <a href="#" class="text-sm text-indigo-600 hover:underline">Bảng quy đổi kích cỡ</a>
+                        </div>
                         <div id="size-options" class="flex flex-wrap gap-2">
                             <?php foreach ($options['Size'] as $size): ?>
                                 <button class="option-btn" data-group="Size" data-value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></button>
@@ -94,6 +95,7 @@
                         </div>
                     </div>
                 <?php endif; ?>
+
                 <?php if (isset($options['Màu sắc'])): ?>
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-gray-700 mb-2">Màu sắc:</h3>
@@ -104,6 +106,7 @@
                         </div>
                     </div>
                 <?php endif; ?>
+
                 <form id="add-to-cart-form" action="/shoe-shop/public/cart/add" method="POST">
                     <input type="hidden" name="variant_id" id="selected-variant-id">
                     <div class="flex items-center mb-6">
@@ -115,6 +118,22 @@
                     </button>
                 </form>
 
+                <div class="mt-6 border-t border-b py-4 grid grid-cols-2 gap-4">
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2 2h8a1 1 0 001-1zM3 10h10M16 16l4-4h-7m-4-4l-4 4"></path>
+                        </svg>
+                        <span>Giao hàng nhanh 2-4 ngày</span>
+                    </div>
+                    <div class="flex items-center text-sm text-gray-600">
+                        <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span>Miễn phí đổi trả 30 ngày</span>
+                    </div>
+                </div>
+
                 <div class="mt-8">
                     <h2 class="text-xl font-semibold text-gray-700 mb-2">Mô tả sản phẩm</h2>
                     <p class="text-gray-600 leading-relaxed"><?= nl2br(htmlspecialchars($product->description)) ?></p>
@@ -125,12 +144,53 @@
         <div class="mt-12 bg-white p-8 rounded-lg shadow-md">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Đánh giá từ khách hàng</h2>
 
+            <?php
+            // PHP tính toán tóm tắt đánh giá (giữ nguyên)
+            $totalReviews = count($reviews);
+            $averageRating = 0;
+            $ratingCounts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
+            if ($totalReviews > 0) {
+                $totalStars = 0;
+                foreach ($reviews as $review) {
+                    $totalStars += $review->rating;
+                    if (isset($ratingCounts[$review->rating])) {
+                        $ratingCounts[$review->rating]++;
+                    }
+                }
+                $averageRating = $totalStars / $totalReviews;
+            }
+            ?>
+
+            <div class="flex flex-col md:flex-row gap-8 mb-8">
+                <div class="text-center">
+                    <p class="text-5xl font-bold"><?= number_format($averageRating, 1) ?></p>
+                    <div class="flex justify-center">
+                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                            <svg class="w-6 h-6 <?= $i <= round($averageRating) ? 'text-yellow-400' : 'text-gray-300' ?>" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.956a1 1 0 00.95.69h4.162c.969 0 1.371 1.24.588 1.81l-3.368 2.448a1 1 0 00-.364 1.118l1.286 3.956c.3.921-.755 1.688-1.54 1.118l-3.368-2.448a1 1 0 00-1.175 0l-3.368 2.448c-.784.57-1.838-.197-1.539-1.118l1.286-3.956a1 1 0 00-.364-1.118L2.064 9.383c-.784-.57-.38-1.81.588-1.81h4.162a1 1 0 00.95-.69L9.049 2.927z" />
+                            </svg>
+                        <?php endfor; ?>
+                    </div>
+                    <p class="text-gray-600 mt-1"><?= $totalReviews ?> đánh giá</p>
+                </div>
+                <div class="flex-grow">
+                    <?php for ($star = 5; $star >= 1; $star--): ?>
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-sm font-medium text-gray-600"><?= $star ?> sao</span>
+                            <div class="progress-bar flex-grow">
+                                <div class="progress-fill" style="width: <?= $totalReviews > 0 ? ($ratingCounts[$star] / $totalReviews * 100) : 0 ?>%;"></div>
+                            </div>
+                            <span class="text-sm text-gray-500 w-8 text-right"><?= $ratingCounts[$star] ?></span>
+                        </div>
+                    <?php endfor; ?>
+                </div>
+            </div>
+
             <?php if ($canReview): ?>
                 <div class="mb-8 p-6 bg-gray-50 rounded-lg border">
                     <h3 class="text-xl font-semibold text-gray-700 mb-4">Viết đánh giá của bạn</h3>
                     <form action="/shoe-shop/public/product/<?= $product->id ?>/review" method="POST">
                         <input type="hidden" name="order_id" value="<?= $orderIdForReview ?>">
-
                         <div class="mb-4">
                             <label class="block text-gray-700 font-medium mb-2">Bạn đánh giá sản phẩm này thế nào?</label>
                             <div class="star-rating">
@@ -141,12 +201,10 @@
                                 <input type="radio" id="1-star" name="rating" value="1" /><label for="1-star">★</label>
                             </div>
                         </div>
-
                         <div class="mb-4">
                             <label for="comment" class="block text-gray-700 font-medium mb-2">Bình luận của bạn</label>
                             <textarea name="comment" id="comment" rows="4" class="w-full border rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm..."></textarea>
                         </div>
-
                         <button type="submit" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition">Gửi đánh giá</button>
                     </form>
                 </div>
@@ -177,31 +235,10 @@
                 <?php endif; ?>
             </div>
         </div>
-        <?php if (!empty($relatedProducts)): ?>
-            <section class="mt-16">
-                <h2 class="text-3xl font-bold text-center text-gray-800 mb-8">Sản phẩm tương tự</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <?php foreach ($relatedProducts as $related): ?>
-                        <div class="bg-white rounded-lg shadow-md overflow-hidden group">
-                            <a href="/shoe-shop/public/product/<?= htmlspecialchars($related->id) ?>">
-                                <div class="relative hover:scale-105 transition-all duration-300">
-                                    <img src="<?= htmlspecialchars($related->image_url) ?>" alt="<?= htmlspecialchars($related->name) ?>" class="w-full h-64 object-cover">
-                                </div>
-                                <div class="p-4 text-center">
-                                    <h3 class="text-lg font-semibold text-gray-800 truncate"><?= htmlspecialchars($related->name) ?></h3>
-                                    <p class="text-black font-bold text-xl mt-2"><?= number_format($related->price) ?> VNĐ</p>
-                                </div>
-                            </a>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </section>
-        <?php endif; ?>
     </main>
     <?php require_once __DIR__ . '/../../layout/footer.php'; ?>
 
     <script>
-        // (Phần script cũ cho việc chọn biến thể giữ nguyên, không thay đổi)
         const variantsData = <?= json_encode($variants) ?>;
         const priceElement = document.getElementById('product-price');
         const stockElement = document.getElementById('stock-status');

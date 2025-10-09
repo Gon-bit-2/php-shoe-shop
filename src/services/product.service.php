@@ -47,9 +47,21 @@ class ProductService
         // Gọi đến Repository để lưu tất cả dữ liệu
         return $this->productRepository->save($product, $categoryIDs, $variantsData);
     }
-    function getAllProducts()
+    function getAllProducts($page)
     {
-        return $this->productRepository->findAll();
+        $page = is_numeric($page) ? (int)$page : 1;
+        $productsPerPage = 8; // Số sản phẩm mỗi trang trong admin
+        $offset = ($page - 1) * $productsPerPage;
+
+        $products = $this->productRepository->findAll($productsPerPage, $offset);
+        $totalProducts = $this->productRepository->countAll();
+        $totalPages = ceil($totalProducts / $productsPerPage);
+
+        return [
+            'products' => $products,
+            'totalPages' => $totalPages,
+            'currentPage' => $page
+        ];
     }
     function getProductById($id)
     {

@@ -78,7 +78,13 @@ class OrderRepository
     }
     public function findItemsByOrderId($orderId)
     {
-        $query = "SELECT * FROM order_items WHERE order_id = :order_id";
+        $query = "SELECT
+                oi.*,
+                p.image_url
+              FROM order_items oi
+              JOIN product_variants pv ON oi.variant_id = pv.id
+              JOIN products p ON pv.product_id = p.id
+              WHERE oi.order_id = :order_id";
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(":order_id", $orderId);
         $stmt->execute();
@@ -187,16 +193,21 @@ class OrderRepository
      */
     public function getTopSellingProducts($limit = 5)
     {
+
         $query = "SELECT
-                    oi.product_name,
-                    oi.variant_attributes,
-                    SUM(oi.quantity) as total_sold
-                  FROM order_items oi
-                  JOIN orders o ON oi.order_id = o.id
-                  WHERE o.status = 'completed' -- Chỉ tính từ các đơn đã hoàn thành
-                  GROUP BY oi.product_name, oi.variant_attributes
-                  ORDER BY total_sold DESC
-                  LIMIT :limit";
+                p.id as product_id,          -- Lấy ID sản phẩm để tạo link
+                p.image_url,                 -- Lấy ảnh đại diện của sản phẩm
+                oi.product_name,
+                oi.variant_attributes,
+                SUM(oi.quantity) as total_sold
+              FROM order_items oi
+              JOIN orders o ON oi.order_id = o.id
+              JOIN product_variants pv ON oi.variant_id = pv.id   -- JOIN với biến thể
+              JOIN products p ON pv.product_id = p.id            -- JOIN với sản phẩm
+              WHERE o.status = 'completed'
+              GROUP BY p.id, p.image_url, oi.product_name, oi.variant_attributes
+              ORDER BY total_sold DESC
+              LIMIT :limit";
 
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);

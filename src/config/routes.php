@@ -14,5 +14,6 @@ return [
         '/profile',
         '/orders',
         '/history',
+        '/cart',
     ]
 ];

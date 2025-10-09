@@ -73,7 +73,23 @@ class ProductRepository
             return false;
         }
     }
-
+    public function countAll()
+    {
+        $query = "SELECT COUNT(id) FROM products";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+    function findAll($limit, $offset)
+    {
+        $query = "SELECT * FROM products ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
+        $stmt = $this->conn->prepare($query);
+        // Dùng bindValue để PDO xử lý đúng kiểu dữ liệu INT
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
+    }
     public function findOrCreateAttributeValue($attributeId, $value)
     {
         // Thử tìm giá trị thuộc tính đã tồn tại
@@ -115,13 +131,7 @@ class ProductRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'AttributeValue');
     }
-    function findAll()
-    {
-        $query = "SELECT * FROM products ORDER BY created_at DESC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
-    }
+
     function findById($id)
     {
         if (empty($id) || !is_numeric($id)) {
@@ -299,7 +309,7 @@ class ProductRepository
         $searchTerm = $filters['search'] ?? '';
         $categoryId = $filters['category'] ?? null;
         $priceRange = $filters['price'] ?? null;
-
+        $sort = $filters['sort'] ?? 'newest';
 
         //  chọn p.* và thêm một trường mới 'price' là giá MIN từ các biến thể
         $query = "SELECT p.*, MIN(pv.price) as price
@@ -309,7 +319,6 @@ class ProductRepository
               --  JOIN với product_variants để lấy giá
               LEFT JOIN product_variants pv ON p.id = pv.product_id
               WHERE p.is_active = 1";
-        // **TRUY VẤN ĐÃ SỬA ĐỔI KẾT THÚC TẠI ĐÂY**
 
         $params = [];
 
@@ -343,16 +352,28 @@ class ProductRepository
                 $params[':max_price'] = $maxPrice;
             }
         }
+        $query .= " GROUP BY p.id"; // GROUP BY luôn đứng trước ORDER BY
 
-        $query .= " GROUP BY p.id ORDER BY p.created_at DESC LIMIT :limit OFFSET :offset";
+        switch ($sort) {
+            case 'price_asc':
+                $query .= " ORDER BY price ASC"; // Sắp xếp theo giá MIN đã tính ở trên
+                break;
+            case 'price_desc':
+                $query .= " ORDER BY price DESC";
+                break;
+            default: // 'newest' hoặc các trường hợp khác
+                $query .= " ORDER BY p.created_at DESC";
+                break;
+        }
+        $query .= " LIMIT :limit OFFSET :offset";
 
         $stmt = $this->conn->prepare($query);
-        // Bind all other parameters first
+        //bind các tham số
         foreach ($params as $key => $value) {
             $stmt->bindValue($key, $value);
         }
 
-        // Bind limit and offset as integers
+        //bind limit và offset
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 

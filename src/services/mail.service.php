@@ -18,18 +18,21 @@ class MailService
      * @param mixed $orderDetails
      * @return bool
      */
-    public function sendOrderStatusEmail($orderDetails) // THAY ĐỔI: Nhận thẳng dữ liệu, không cần $orderId
+    // src/services/mail.service.php
+
+    public function sendOrderStatusEmail($orderDetails)
     {
         if (!$orderDetails || !$orderDetails->status) return false;
 
         $order = $orderDetails->order;
         $items = $orderDetails->items;
-        $status = $order->status; // Lấy trạng thái từ chính đơn hàng
+        $status = $order->status;
         $customerEmail = $order->email;
 
         $subject = '';
         $bodyHeader = '';
 
+        // ... (Phần switch-case giữ nguyên, không thay đổi)
         switch ($status) {
             case 'pending':
                 $subject = 'Xác nhận đơn hàng #' . $order->id;
@@ -51,8 +54,10 @@ class MailService
                 return false;
         }
 
+
         $mail = new PHPMailer(true);
         try {
+            // --- PHẦN CẤU HÌNH GIỮ NGUYÊN ---
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
@@ -65,20 +70,42 @@ class MailService
             $mail->addAddress($customerEmail, $order->customer_name);
             $mail->isHTML(true);
             $mail->Subject = $subject;
+
             $emailBody = "<h2>Xin chào " . htmlspecialchars($order->customer_name) . ",</h2>";
             $emailBody .= $bodyHeader;
             $emailBody .= "<h3>Chi tiết đơn hàng:</h3>";
             $emailBody .= "<table border='1' cellpadding='10' cellspacing='0' style='width:100%; border-collapse: collapse;'>";
             $emailBody .= "<tr style='background-color:#f2f2f2;'><th>Sản phẩm</th><th>Ảnh</th><th>Số lượng</th><th>Giá</th><th>Thành tiền</th></tr>";
-            foreach ($items as $item) {
+
+            foreach ($items as $index => $item) {
+                // 1. Chuyển đổi đường dẫn web thành đường dẫn vật lý trên server
+                // Ví dụ: /shoe-shop/public/images/products/abc.jpg -> D:/xampp/htdocs/shoe-shop/public/images/products/abc.jpg
+                $imagePath = realpath(__DIR__ . '/../../public' . str_replace('/shoe-shop/public', '', $item->image_url));
+
+                // 2. Đính kèm ảnh vào email và tạo một ID duy nhất (cid) cho nó
+                if ($imagePath && file_exists($imagePath)) {
+                    $cid = 'image' . $index; // Tạo cid duy nhất cho mỗi ảnh, ví dụ 'image0', 'image1'
+                    $mail->addEmbeddedImage($imagePath, $cid, basename($imagePath));
+                } else {
+                    $cid = null;
+                }
+
                 $emailBody .= "<tr>";
                 $emailBody .= "<td>" . htmlspecialchars($item->product_name) . "<br><small>" . htmlspecialchars($item->variant_attributes) . "</small></td>";
-                $emailBody .= "<td><img src='" . htmlspecialchars($item->image_url) . "' alt='" . htmlspecialchars($item->product_name) . "' style='width:100px; height:100px;'></td>";
+
+                // 3. Sử dụng cid trong thẻ <img>
+                if ($cid) {
+                    $emailBody .= "<td align='center'><img src='cid:" . $cid . "' alt='" . htmlspecialchars($item->product_name) . "' style='width:100px; height:100px;'></td>";
+                } else {
+                    $emailBody .= "<td>(không có ảnh)</td>"; // Hiển thị nếu ảnh không tồn tại
+                }
+
                 $emailBody .= "<td align='center'>" . $item->quantity . "</td>";
                 $emailBody .= "<td align='right'>" . number_format($item->price) . " VNĐ</td>";
                 $emailBody .= "<td align='right'>" . number_format($item->price * $item->quantity) . " VNĐ</td>";
                 $emailBody .= "</tr>";
             }
+
             $emailBody .= "</table>";
             $subtotal = $order->total_amount + $order->discount_amount;
             $emailBody .= "<p style='text-align:right;'><strong>Tạm tính:</strong> " . number_format($subtotal) . " VNĐ</p>";

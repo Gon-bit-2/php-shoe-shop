@@ -1,14 +1,17 @@
 <?php
 require_once '../src/services/product.service.php';
 require_once '../src/services/review.service.php';
+require_once '../src/services/dashboard.service.php';
 class ProductController
 {
     private $productService;
     private $reviewService;
+    private $dashboardService;
     public function __construct($conn)
     {
         $this->productService = new ProductService($conn);
         $this->reviewService = new ReviewService($conn);
+        $this->dashboardService = new DashboardService($conn);
     }
     //method admin
     public function create($errorMessage = '', $oldInput = [])
@@ -30,25 +33,27 @@ class ProductController
             header('Location: /shoe-shop/public/admin/products');
             exit();
         } else {
-            // Xử lý lỗi
             $categories = $this->productService->getAllCategories();
 
-            // --- BẮT ĐẦU SỬA LỖI ---
-            // Lấy lại cả sizes và colors, giống hệt như trong hàm create()
+            // Lấy lại cả sizes và colors
             $sizes = $this->productService->getAttributeValuesByName('Size');
             $colors = $this->productService->getAttributeValuesByName('Màu sắc');
-            // --- KẾT THÚC SỬA LỖI ---
 
             $errorMessage = $errorMessage ?: "Có lỗi xảy ra khi lưu sản phẩm, vui lòng thử lại.";
             $oldInput = $oldInput ?: $_POST;
 
-            // Nạp lại view với đầy đủ dữ liệu
             require_once __DIR__ . '/../views/admin/products/create.php';
         }
     }
     function getAllProducts()
     {
-        $products = $this->productService->getAllProducts();
+        $page = $_GET['page'] ?? 1;
+        $data = $this->productService->getAllProducts($page);
+
+        $products = $data['products'];
+        $totalPages = $data['totalPages'];
+        $currentPage = $data['currentPage'];
+
         require_once __DIR__ . '/../views/admin/products/index.php';
     }
     public function getEditPage($id, $errorMessage = '', $oldInput = [])
@@ -118,8 +123,10 @@ class ProductController
 
         // 2. Chỉ lấy danh sách sản phẩm từ mảng dữ liệu đó
         $products = $data['products'];
-
-        // Phần còn lại giữ nguyên
+        //3. Lấy TOP SẢN PHẨM BÁN CHẠY
+        $dashboardData = $this->dashboardService->getDashboardData();
+        $topSellingProducts = $dashboardData->topProducts;
+        //4. Lấy danh sách danh mục
         $categories = $this->productService->getAllCategories();
         require_once __DIR__ . '/../views/home/products/index.php';
     }
@@ -184,7 +191,8 @@ class ProductController
             'search' => $_GET['search'] ?? '',
             'category' => $_GET['category'] ?? null,
             'price' => $_GET['price'] ?? null,
-            'page' => $_GET['page'] ?? 1 // Lấy số trang từ URL
+            'page' => $_GET['page'] ?? 1, // Lấy số trang từ URL
+            'sort' => $_GET['sort'] ?? 'newest'
         ];
 
         $data = $this->productService->getAllProductsActive($filters);
@@ -195,7 +203,8 @@ class ProductController
         $currentPage = $data['currentPage'];
 
         $categories = $this->productService->getAllCategories();
-
+        $sizes = $this->productService->getAttributeValuesByName('Size');
+        $colors = $this->productService->getAttributeValuesByName('Màu sắc');
         require_once __DIR__ . '/../views/home/products/filterPage.php';
     }
     //end
