@@ -17,6 +17,12 @@
             </div>
             <?php unset($_SESSION['forgot_message']); ?>
         <?php endif; ?>
+        <?php if (isset($_SESSION['forgot_error'])): ?>
+            <div class="bg-red-100 text-red-700 p-3 rounded mb-4 text-center">
+                <?= htmlspecialchars($_SESSION['forgot_error']) ?>
+            </div>
+            <?php unset($_SESSION['forgot_error']); ?>
+        <?php endif; ?>
         <form action="/shoe-shop/public/forgot-password" method="POST">
             <div class="mb-4">
                 <label for="email" class="block text-gray-700 font-medium mb-2">Email</label>

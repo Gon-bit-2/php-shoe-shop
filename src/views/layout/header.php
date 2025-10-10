@@ -1,5 +1,5 @@
 <header class="bg-white shadow-md sticky top-0 z-10">
-    <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+    <div class="container mx-auto px-6 py-2 flex justify-between items-center">
         <a href="/shoe-shop/public/" class="text-2xl font-bold text-gray-800"><img src="/shoe-shop/public/images/logo/logo-shoe.png" alt="ShoeShop" class="w-20 h-20 object-cover"></a>
         <nav class="hidden md:flex space-x-6 items-center">
             <a href="/shoe-shop/public/" class="text-gray-600 hover:text-indigo-600">Trang Chủ</a>

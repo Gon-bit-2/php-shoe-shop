@@ -189,6 +189,12 @@
             <?php if ($canReview): ?>
                 <div class="mb-8 p-6 bg-gray-50 rounded-lg border">
                     <h3 class="text-xl font-semibold text-gray-700 mb-4">Viết đánh giá của bạn</h3>
+                    <?php if (isset($_SESSION['review_error'])): ?>
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            <?= htmlspecialchars($_SESSION['review_error']) ?>
+                        </div>
+                        <?php unset($_SESSION['review_error']); ?>
+                    <?php endif; ?>
                     <form action="/shoe-shop/public/product/<?= $product->id ?>/review" method="POST">
                         <input type="hidden" name="order_id" value="<?= $orderIdForReview ?>">
                         <div class="mb-4">
@@ -234,6 +240,28 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
+        </div>
+        <div class="mt-12">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Sản phẩm tương tự</h2>
+            <?php if (empty($relatedProducts)): ?>
+                <p class="text-gray-500">Không có sản phẩm tương tự.</p>
+            <?php else: ?>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <?php foreach ($relatedProducts as $relatedProduct): ?>
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden group">
+                            <a href="/shoe-shop/public/product/<?= htmlspecialchars($relatedProduct->id) ?>">
+                                <div class="relative overflow-hidden">
+                                    <img src="<?= htmlspecialchars($relatedProduct->image_url) ?>" alt="<?= htmlspecialchars($relatedProduct->name) ?>" class="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105">
+                                </div>
+                                <div class="p-4 text-center">
+                                    <h3 class="text-lg font-semibold text-gray-800 truncate"><?= htmlspecialchars($relatedProduct->name) ?></h3>
+                                    <p class="text-black font-bold text-xl mt-2"><?= number_format($relatedProduct->price) ?> VNĐ</p>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
     </main>
     <?php require_once __DIR__ . '/../../layout/footer.php'; ?>

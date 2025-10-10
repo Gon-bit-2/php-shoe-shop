@@ -11,6 +11,12 @@
     <?php require_once __DIR__ . '/../partials/navbar.php'; ?>
     <div class="container mx-auto mt-10 p-8 bg-white max-w-lg shadow-md rounded-lg">
         <h1 class="text-3xl font-bold mb-6">Sửa Người dùng</h1>
+        <?php if (isset($_SESSION['user_error'])): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <?= htmlspecialchars($_SESSION['user_error']); ?>
+            </div>
+            <?php unset($_SESSION['user_error']); ?>
+        <?php endif; ?>
         <form action="/shoe-shop/public/admin/users/edit/<?= $user->id ?>" method="POST">
             <div class="mb-4">
                 <label for="fullname" class="block text-gray-700 font-bold mb-2">Họ và tên</label>

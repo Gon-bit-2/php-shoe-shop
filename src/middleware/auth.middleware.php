@@ -100,4 +100,44 @@ class AuthMiddleware
             $this->redirectIfAuthenticated();
         }
     }
+    public function validateForgotPasswordBody($data)
+    {
+        $email = trim($data['email'] ?? '');
+
+        if (empty($email)) {
+            return 'Email không được để trống!';
+        }
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return 'Email không đúng định dạng!';
+        }
+
+        return false;
+    }
+
+    public function validateResetPasswordBody($data)
+    {
+        $token = trim($data['token'] ?? '');
+        $password = trim($data['password'] ?? '');
+        $confirmPassword = trim($data['confirm_password'] ?? '');
+
+        if (empty($token)) {
+            return 'Token không hợp lệ!';
+        }
+
+        if (empty($password)) {
+            return 'Mật khẩu mới không được để trống!';
+        }
+        if (strlen(str_replace(' ', '', $password)) < 6) {
+            return 'Mật khẩu mới phải có ít nhất 6 ký tự!';
+        }
+
+        if (empty($confirmPassword)) {
+            return 'Vui lòng xác nhận mật khẩu!';
+        }
+        if ($password !== $confirmPassword) {
+            return 'Mật khẩu xác nhận không khớp!';
+        }
+
+        return false;
+    }
 }

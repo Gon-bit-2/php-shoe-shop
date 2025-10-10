@@ -11,6 +11,12 @@
     <?php require_once __DIR__ . '/../partials/navbar.php'; ?>
     <div class="container mx-auto mt-10 p-8 bg-white max-w-lg shadow-md rounded-lg">
         <h1 class="text-3xl font-bold mb-6">Thêm Danh mục mới</h1>
+        <?php if (isset($_SESSION['category_error'])): ?>
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <?= htmlspecialchars($_SESSION['category_error']); ?>
+            </div>
+            <?php unset($_SESSION['category_error']); ?>
+        <?php endif; ?>
         <form action="/shoe-shop/public/admin/categories/create" method="POST" enctype="multipart/form-data">
             <div class="mb-4">
                 <label for="name" class="block text-gray-700 font-bold mb-2">Tên Danh mục</label>

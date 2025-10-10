@@ -1,8 +1,18 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 require_once '../src/models/repositories/database.php';
+
+// Middleware
 require_once '../src/middleware/auth.middleware.php';
 require_once '../src/middleware/product.middleware.php';
+require_once '../src/middleware/voucher.middleware.php';
+require_once '../src/middleware/category.middleware.php';
+require_once '../src/middleware/user.middleware.php';
+require_once '../src/middleware/order.middleware.php';
+require_once '../src/middleware/cart.middleware.php';
+require_once '../src/middleware/review.middleware.php';
+
+// Controllers
 require_once '../src/controllers/product.controller.php';
 require_once '../src/controllers/auth.controller.php';
 require_once '../src/controllers/dashBoard.controller.php';
@@ -19,11 +29,17 @@ $path = parse_url($path, PHP_URL_PATH);
 if ($path === '') {
     $path = '/';
 }
-//
+// Khởi tạo middleware instances
 $method = $_SERVER['REQUEST_METHOD'];
 $authMiddleware = new AuthMiddleware();
 $authMiddleware->applyGlobalMiddleware($path);
 $productMiddleware = new ProductMiddleware();
+$voucherMiddleware = new VoucherMiddleware();
+$categoryMiddleware = new CategoryMiddleware();
+$userMiddleware = new UserMiddleware();
+$orderMiddleware = new OrderMiddleware();
+$cartMiddleware = new CartMiddleware();
+$reviewMiddleware = new ReviewMiddleware();
 
 switch ($path) {
     case '/':
@@ -73,6 +89,12 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->showProfile();
         } elseif ($method == 'POST') {
+            $errorMessage = $userMiddleware->validateProfileUpdateBody($_POST);
+            if ($errorMessage) {
+                $_SESSION['profile_error'] = $errorMessage;
+                header('Location: /shoe-shop/public/profile');
+                exit();
+            }
             $controller->updateProfile();
         }
         break;
@@ -81,6 +103,12 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->showForgotPasswordForm();
         } elseif ($method == 'POST') {
+            $errorMessage = $authMiddleware->validateForgotPasswordBody($_POST);
+            if ($errorMessage) {
+                $_SESSION['forgot_error'] = $errorMessage;
+                header('Location: /shoe-shop/public/forgot-password');
+                exit();
+            }
             $controller->handleForgotPassword();
         }
         break;
@@ -90,6 +118,13 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->showResetPasswordForm();
         } elseif ($method == 'POST') {
+            $errorMessage = $authMiddleware->validateResetPasswordBody($_POST);
+            if ($errorMessage) {
+                $_SESSION['reset_error'] = $errorMessage;
+                $token = $_POST['token'] ?? '';
+                header('Location: /shoe-shop/public/reset-password?token=' . urlencode($token));
+                exit();
+            }
             $controller->handleResetPassword();
         }
         break;
@@ -133,7 +168,11 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->create();
         } elseif ($method == 'POST') {
-            // Sẽ thêm validation sau
+            $errorMessage = $voucherMiddleware->validateVoucherBody($_POST);
+            if ($errorMessage) {
+                $controller->create($errorMessage, $_POST);
+                exit();
+            }
             $controller->store();
         }
         break;
@@ -146,6 +185,12 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->create();
         } elseif ($method == 'POST') {
+            $errorMessage = $categoryMiddleware->validateCategoryBody($_POST, $_FILES['image'] ?? null);
+            if ($errorMessage) {
+                $_SESSION['category_error'] = $errorMessage;
+                header('Location: /shoe-shop/public/admin/categories/create');
+                exit();
+            }
             $controller->store();
         }
         break;
@@ -162,12 +207,24 @@ switch ($path) {
         break;
     case '/cart/add':
         if ($method == 'POST') {
+            $errorMessage = $cartMiddleware->validateAddToCartBody($_POST);
+            if ($errorMessage) {
+                $_SESSION['cart_error'] = $errorMessage;
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/shoe-shop/public/'));
+                exit();
+            }
             $controller = new CartController($conn);
             $controller->add();
         }
         break;
     case '/cart/update':
         if ($method == 'POST') {
+            $errorMessage = $cartMiddleware->validateUpdateCartBody($_POST);
+            if ($errorMessage) {
+                $_SESSION['cart_error'] = $errorMessage;
+                header('Location: /shoe-shop/public/cart');
+                exit();
+            }
             $controller = new CartController($conn);
             $controller->update();
         }
@@ -186,6 +243,12 @@ switch ($path) {
         break;
     case '/cart/remove':
         if ($method == 'POST') {
+            $errorMessage = $cartMiddleware->validateRemoveFromCartBody($_POST);
+            if ($errorMessage) {
+                $_SESSION['cart_error'] = $errorMessage;
+                header('Location: /shoe-shop/public/cart');
+                exit();
+            }
             $controller = new CartController($conn);
             $controller->remove();
         }
@@ -202,6 +265,11 @@ switch ($path) {
         if ($method == 'GET') {
             $controller->showCheckoutForm();
         } elseif ($method == 'POST') {
+            $errorMessage = $orderMiddleware->validateCheckoutBody($_POST);
+            if ($errorMessage) {
+                $controller->showCheckoutForm($errorMessage);
+                exit();
+            }
             $controller->placeOrder();
         }
         break;
@@ -220,6 +288,12 @@ switch ($path) {
             if ($method == 'GET') {
                 $controller->edit($userId);
             } elseif ($method == 'POST') {
+                $errorMessage = $userMiddleware->validateUserEditBody($_POST);
+                if ($errorMessage) {
+                    $_SESSION['user_error'] = $errorMessage;
+                    header('Location: /shoe-shop/public/admin/users/edit/' . $userId);
+                    exit();
+                }
                 $controller->update($userId);
             }
             break;
@@ -249,6 +323,12 @@ switch ($path) {
             if ($method == 'GET') {
                 $controller->edit($categoryId);
             } elseif ($method == 'POST') {
+                $errorMessage = $categoryMiddleware->validateCategoryBody($_POST, $_FILES['image'] ?? null);
+                if ($errorMessage) {
+                    $_SESSION['category_error'] = $errorMessage;
+                    header('Location: /shoe-shop/public/admin/categories/edit/' . $categoryId);
+                    exit();
+                }
                 $controller->update($categoryId);
             }
             break;
@@ -278,6 +358,13 @@ switch ($path) {
         }
         // user add review
         if (preg_match('/^\/product\/(\d+)\/review$/', $path, $matches) && $method == 'POST') {
+            $errorMessage = $reviewMiddleware->validateReviewBody($_POST);
+            if ($errorMessage) {
+                $_SESSION['review_error'] = $errorMessage;
+                $productId = $matches[1];
+                header('Location: /shoe-shop/public/product/' . $productId);
+                exit();
+            }
             $controller = new ProductController($conn);
             $productId = $matches[1];
             $controller->addReview($productId);
@@ -304,6 +391,11 @@ switch ($path) {
             if ($method == 'GET') {
                 $controller->edit($voucherId);
             } elseif ($method == 'POST') {
+                $errorMessage = $voucherMiddleware->validateVoucherBody($_POST);
+                if ($errorMessage) {
+                    $controller->edit($voucherId, $errorMessage, $_POST);
+                    exit();
+                }
                 $controller->update($voucherId);
             }
             break;
