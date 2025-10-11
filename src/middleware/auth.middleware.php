@@ -6,8 +6,9 @@ class AuthMiddleware
         $fullname = trim($data['fullname'] ?? '');
         $email = trim($data['email'] ?? '');
         $password = trim($data['password']);
+        $confirmPassword = trim($data['confirm_password']);
 
-        if (empty($fullname) || empty($email) || empty($password)) {
+        if (empty($fullname) || empty($email) || empty($password) || empty($confirmPassword)) {
             return 'Vui lòng nhập đầy đủ thông tin!';
         }
         if (strlen($fullname) < 2) {
@@ -19,6 +20,10 @@ class AuthMiddleware
 
         if (strlen(str_replace(' ', '', $password)) < 6) {
             return 'Mật khẩu phải có ít nhất 6 ký tự!';
+        }
+
+        if ($password !== $confirmPassword) {
+            return 'Mật khẩu xác nhận không khớp!';
         }
 
         return false;
