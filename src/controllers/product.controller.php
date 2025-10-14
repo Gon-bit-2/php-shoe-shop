@@ -2,16 +2,19 @@
 require_once '../src/services/product.service.php';
 require_once '../src/services/review.service.php';
 require_once '../src/services/dashboard.service.php';
+require_once '../src/services/voucher.service.php';
 class ProductController
 {
     private $productService;
     private $reviewService;
     private $dashboardService;
+    private $voucherService;
     public function __construct($conn)
     {
         $this->productService = new ProductService($conn);
         $this->reviewService = new ReviewService($conn);
         $this->dashboardService = new DashboardService($conn);
+        $this->voucherService = new VoucherService($conn);
     }
     //method admin
     public function create($errorMessage = '', $oldInput = [])
@@ -120,6 +123,7 @@ class ProductController
     {
         // 1. Gọi service và nhận về toàn bộ dữ liệu
         $data = $this->productService->getAllProductsActive([]);
+        $activeVouchers = $this->voucherService->getActiveVouchers();
 
         // 2. Chỉ lấy danh sách sản phẩm từ mảng dữ liệu đó
         $products = $data['products'];
@@ -194,7 +198,6 @@ class ProductController
             'page' => $_GET['page'] ?? 1, // Lấy số trang từ URL
             'sort' => $_GET['sort'] ?? 'newest'
         ];
-
         $data = $this->productService->getAllProductsActive($filters);
 
         // Truyền toàn bộ mảng dữ liệu sang view

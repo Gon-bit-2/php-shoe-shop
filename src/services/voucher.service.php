@@ -82,7 +82,10 @@ class VoucherService
     {
         return $this->voucherRepository->findById($id);
     }
-
+    public function getActiveVouchers()
+    {
+        return $this->voucherRepository->findActiveVouchers();
+    }
     public function updateVoucher($id, $data)
     {
         $voucher = $this->getVoucherById($id);

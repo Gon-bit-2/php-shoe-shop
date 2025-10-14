@@ -25,6 +25,7 @@
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ảnh</th>
 
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Số lượng</th>
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Hành động</th>
                     </tr>
                 </thead>
@@ -60,6 +61,7 @@
                                         </span>
                                     <?php endif; ?>
                                 </td>
+
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-left">
                                     <a href="/shoe-shop/public/admin/products/edit/<?= $product->id ?>" class="text-indigo-600 hover:text-indigo-900">Sửa</a>
                                     <form action="/shoe-shop/public/admin/products/delete/<?= $product->id ?>" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">

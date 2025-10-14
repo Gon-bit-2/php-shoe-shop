@@ -86,4 +86,20 @@ class VoucherRepository
         $stmt->bindParam(":code", $code);
         return $stmt->execute();
     }
+    public function findActiveVouchers()
+    {
+        $now = date('Y-m-d H:i:s');
+        $query = "SELECT * FROM vouchers
+              WHERE is_active = 1
+              AND (starts_at IS NULL OR starts_at <= :now)
+              AND (expires_at IS NULL OR expires_at >= :now)
+              AND used_count < quantity
+              ORDER BY created_at DESC
+              LIMIT 6";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':now', $now);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher');
+    }
 }
