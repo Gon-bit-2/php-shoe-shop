@@ -84,9 +84,9 @@ function isFilterActive($paramName, $value)
                 <div class="bg-white p-4 rounded-lg shadow-md mb-6 flex items-center justify-between">
                     <span class="text-gray-600">Sắp xếp theo:</span>
                     <div>
-                        <a href="<?= buildFilterUrl(['sort' => 'newest']) ?>" class="px-3 py-1 rounded-full <?= (!isset($_GET['sort']) || $_GET['sort'] == 'newest') ? 'bg-indigo-600 text-white' : 'text-gray-700' ?>">Mới nhất</a>
-                        <a href="<?= buildFilterUrl(['sort' => 'price_asc']) ?>" class="px-3 py-1 rounded-full <?= isFilterActive('sort', 'price_asc') ? 'bg-indigo-600 text-white' : 'text-gray-700' ?>">Giá tăng dần</a>
-                        <a href="<?= buildFilterUrl(['sort' => 'price_desc']) ?>" class="px-3 py-1 rounded-full <?= isFilterActive('sort', 'price_desc') ? 'bg-indigo-600 text-white' : 'text-gray-700' ?>">Giá giảm dần</a>
+                        <a href="<?= buildFilterUrl(['sort' => 'newest']) ?>" class="px-3 py-1 rounded-full <?= (!isset($_GET['sort']) || $_GET['sort'] == 'newest') ? 'bg-gray-600 text-white' : 'text-gray-700' ?>">Mới nhất</a>
+                        <a href="<?= buildFilterUrl(['sort' => 'price_asc']) ?>" class="px-3 py-1 rounded-full <?= isFilterActive('sort', 'price_asc') ? 'bg-gray-600 text-white' : 'text-gray-700' ?>">Giá tăng dần</a>
+                        <a href="<?= buildFilterUrl(['sort' => 'price_desc']) ?>" class="px-3 py-1 rounded-full <?= isFilterActive('sort', 'price_desc') ? 'bg-gray-600 text-white' : 'text-gray-700' ?>">Giá giảm dần</a>
                     </div>
                 </div>
 

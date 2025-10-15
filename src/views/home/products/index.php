@@ -18,6 +18,7 @@
     <?php require_once __DIR__ . '/../../layout/header.php'; ?>
 
     <main>
+        <!-- banner -->
         <section class="relative bg-gray-900 text-white overflow-hidden">
             <div class="banner-slider relative h-[80vh]">
                 <!-- Các slides -->
@@ -247,7 +248,7 @@
                     <?php if (empty($products)): ?>
                         <p class="col-span-full text-center text-gray-500">Hiện chưa có sản phẩm nào.</p>
                     <?php else: ?>
-                        <?php foreach (array_slice($products, 0, 8) as $product): ?>
+                        <?php foreach (array_slice($products, 4, 10) as $product): ?>
                             <div class="bg-white rounded-lg shadow-md overflow-hidden group">
                                 <a href="/shoe-shop/public/product/<?= htmlspecialchars($product->id) ?>">
                                     <div class="relative hover:scale-105 transition-all duration-300">

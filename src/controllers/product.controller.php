@@ -121,8 +121,9 @@ class ProductController
     //method user
     public function getAllProductsActive()
     {
+        $filters = ['limit' => 12];
         // 1. Gọi service và nhận về toàn bộ dữ liệu
-        $data = $this->productService->getAllProductsActive([]);
+        $data = $this->productService->getAllProductsActive($filters);
         $activeVouchers = $this->voucherService->getActiveVouchers();
 
         // 2. Chỉ lấy danh sách sản phẩm từ mảng dữ liệu đó

@@ -78,7 +78,7 @@
                 <h1 class="text-4xl font-extrabold text-gray-800 mb-2"><?= htmlspecialchars($product->name) ?></h1>
 
                 <div class="mb-6">
-                    <span id="product-price" class="text-3xl font-bold text-indigo-600">Chọn Size và Màu</span>
+                    <span id="product-price" class="text-3xl font-bold text-gray-600">Chọn Size và Màu</span>
                     <p id="stock-status" class="text-sm text-gray-500 mt-1">&nbsp;</p>
                 </div>
 
@@ -86,7 +86,7 @@
                     <div class="mb-4">
                         <div class="flex justify-between items-center mb-2">
                             <h3 class="text-lg font-semibold text-gray-700">Size:</h3>
-                            <a href="#" class="text-sm text-indigo-600 hover:underline">Bảng quy đổi kích cỡ</a>
+                            <a href="#" class="text-sm text-gray-600 hover:underline">Bảng quy đổi kích cỡ</a>
                         </div>
                         <div id="size-options" class="flex flex-wrap gap-2">
                             <?php foreach ($options['Size'] as $size): ?>
@@ -117,7 +117,7 @@
                         Chọn Size và Màu
                     </button>
                 </form>
-
+                <!-- #region -->
                 <div class="mt-6 border-t border-b py-4 grid grid-cols-2 gap-4">
                     <div class="flex items-center text-sm text-gray-600">
                         <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -211,7 +211,7 @@
                             <label for="comment" class="block text-gray-700 font-medium mb-2">Bình luận của bạn</label>
                             <textarea name="comment" id="comment" rows="4" class="w-full border rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" placeholder="Hãy chia sẻ cảm nhận của bạn về sản phẩm..."></textarea>
                         </div>
-                        <button type="submit" class="bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-indigo-700 transition">Gửi đánh giá</button>
+                        <button type="submit" class="bg-black text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-900 transition">Gửi đánh giá</button>
                     </form>
                 </div>
             <?php endif; ?>
