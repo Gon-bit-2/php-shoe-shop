@@ -90,18 +90,26 @@
                         </div>
                         <div id="size-options" class="flex flex-wrap gap-2">
                             <?php foreach ($options['Size'] as $size): ?>
-                                <button class="option-btn" data-group="Size" data-value="<?= htmlspecialchars($size) ?>"><?= htmlspecialchars($size) ?></button>
+                                <button class="option-btn" data-group="Size" data-value="<?= htmlspecialchars($size) ?>">
+                                    <?= htmlspecialchars($size) ?>
+                                </button>
                             <?php endforeach; ?>
                         </div>
                     </div>
                 <?php endif; ?>
 
+                <!-- Hiển thị trạng thái hàng ở giữa Size và Màu sắc (ẩn ban đầu) -->
+                <div id="variant-stock-status" class="hidden mb-4 p-3 rounded-lg border text-center">
+                    <span class="font-semibold">Vui lòng chọn size và màu</span>
+                </div>
                 <?php if (isset($options['Màu sắc'])): ?>
                     <div class="mb-6">
                         <h3 class="text-lg font-semibold text-gray-700 mb-2">Màu sắc:</h3>
                         <div id="color-options" class="flex flex-wrap gap-2">
                             <?php foreach ($options['Màu sắc'] as $color): ?>
-                                <button class="option-btn" data-group="Màu sắc" data-value="<?= htmlspecialchars($color) ?>"><?= htmlspecialchars($color) ?></button>
+                                <button class="option-btn" data-group="Màu sắc" data-value="<?= htmlspecialchars($color) ?>">
+                                    <?= htmlspecialchars($color) ?>
+                                </button>
                             <?php endforeach; ?>
                         </div>
                     </div>
@@ -285,22 +293,50 @@
                 const colorMatch = !currentSelection['Màu sắc'] || variant.attributes['Màu sắc'] === currentSelection['Màu sắc'];
                 return sizeMatch && colorMatch;
             });
+
+            const stockStatusElement = document.getElementById('variant-stock-status');
+
             if (currentSelection['Size'] && currentSelection['Màu sắc'] && selectedVariant) {
                 priceElement.textContent = new Intl.NumberFormat('vi-VN', {
                     style: 'currency',
                     currency: 'VND'
                 }).format(selectedVariant.price);
+
                 if (selectedVariant.stock > 0) {
                     stockElement.textContent = `Còn lại: ${selectedVariant.stock} sản phẩm`;
                     stockElement.classList.remove('text-red-500');
                     addToCartBtn.disabled = false;
                     addToCartBtn.textContent = 'Thêm vào giỏ hàng';
                     quantityInput.max = selectedVariant.stock;
+
+                    // Hiển thị box "Còn hàng" màu xanh
+                    stockStatusElement.classList.remove('hidden', 'border-red-200', 'bg-red-50');
+                    stockStatusElement.classList.add('border-green-200', 'bg-green-50');
+                    stockStatusElement.innerHTML = `
+                        <span class="text-green-600 flex items-center justify-center gap-1">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            Còn hàng (${selectedVariant.stock} sản phẩm)
+                        </span>
+                    `;
                 } else {
                     stockElement.textContent = 'Hết hàng';
                     stockElement.classList.add('text-red-500');
                     addToCartBtn.disabled = true;
                     addToCartBtn.textContent = 'Hết hàng';
+
+                    // Hiển thị box "Hết hàng" màu đỏ
+                    stockStatusElement.classList.remove('hidden', 'border-green-200', 'bg-green-50');
+                    stockStatusElement.classList.add('border-red-200', 'bg-red-50');
+                    stockStatusElement.innerHTML = `
+                        <span class="text-red-600 flex items-center justify-center gap-1">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            Hết hàng
+                        </span>
+                    `;
                 }
                 variantIdInput.value = selectedVariant.id;
             } else {
@@ -309,6 +345,9 @@
                 addToCartBtn.disabled = true;
                 addToCartBtn.textContent = 'Chọn Size và Màu';
                 variantIdInput.value = '';
+
+                // Ẩn box trạng thái khi chưa chọn đủ
+                stockStatusElement.classList.add('hidden');
             }
         }
         optionButtons.forEach(button => {

@@ -203,7 +203,7 @@ class ProductService
     public function getAllProductsActive($filters = [])
     {
         $page = isset($filters['page']) && is_numeric($filters['page']) ? (int)$filters['page'] : 1;
-        $productsPerPage = isset($filters['limit']) ? (int)$filters['limit'] : 12;
+        $productsPerPage = isset($filters['limit']) ? (int)$filters['limit'] : 9;
         $offset = ($page - 1) * $productsPerPage;
 
         // Lấy danh sách sản phẩm cho trang hiện tại
