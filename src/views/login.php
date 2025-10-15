@@ -114,6 +114,7 @@
             align-items: center;
             gap: 10px;
             animation: slideDown 0.3s ease-out;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
         }
 
         @keyframes slideDown {
@@ -132,6 +133,12 @@
             background: #fee;
             color: #c53030;
             border: 1px solid #fc8181;
+        }
+
+        .alert-success {
+            background: #f0fff4;
+            color: #2f855a;
+            border: 1px solid #9ae6b4;
         }
 
         .form-group {
@@ -329,6 +336,14 @@
                 <p class="auth-subtitle">Đăng nhập để tiếp tục mua sắm</p>
             </div>
 
+            <?php if (isset($_SESSION['success_message']) && !empty($_SESSION['success_message'])): ?>
+                <div class="alert alert-success" id="successAlert">
+                    <i class="fas fa-check-circle"></i>
+                    <span><?= htmlspecialchars($_SESSION['success_message']) ?></span>
+                </div>
+                <?php unset($_SESSION['success_message']); ?>
+            <?php endif; ?>
+
             <?php if (isset($errorMessage) && !empty($errorMessage)): ?>
                 <div class="alert alert-error">
                     <i class="fas fa-exclamation-circle"></i>
@@ -416,6 +431,18 @@
                 this.parentElement.style.transform = 'scale(1)';
             });
         });
+
+        // Auto-hide success message after 5 seconds
+        const successAlert = document.getElementById('successAlert');
+        if (successAlert) {
+            setTimeout(() => {
+                successAlert.style.opacity = '0';
+                successAlert.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    successAlert.remove();
+                }, 300);
+            }, 5000);
+        }
     </script>
 </body>
 

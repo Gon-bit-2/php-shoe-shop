@@ -1,5 +1,11 @@
 <?php
 require_once '../src/services/auth.service.php';
+
+// Khởi tạo session nếu chưa có
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 class AuthController
 {
     private $authService;
@@ -18,15 +24,23 @@ class AuthController
         $email = trim($_POST['email']);
         $password = trim($_POST['password']);
         $result = $this->authService->register($fullname, $email, $password);
-        if ($result) {
-            // Đăng ký thành công
-            header('Location: /shoe-shop/public/login'); // Sẽ tạo trang login sau
+
+        // Kiểm tra kết quả từ AuthService
+        if (is_array($result) && isset($result['status']) && $result['status'] === false) {
+            // Đăng ký thất bại - hiển thị thông báo lỗi
+            $message = $result['message'];
+            $oldInput = ['fullname' => $fullname, 'email' => $email];
+            $this->showRegisterForm($message, $oldInput);
+        } elseif ($result === true) {
+            // Đăng ký thành công - lưu thông báo vào session
+            $_SESSION['success_message'] = 'Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.';
+            header('Location: /shoe-shop/public/login');
             exit();
         } else {
-            // exist email
-            $message = 'Email đã tồn tại hoặc có lỗi xảy ra!';
-            // Nạp lại view và truyền ra biến $message
-            require_once '../src/views/register.php';
+            // Lỗi không xác định
+            $message = 'Có lỗi xảy ra, vui lòng thử lại!';
+            $oldInput = ['fullname' => $fullname, 'email' => $email];
+            $this->showRegisterForm($message, $oldInput);
         }
     }
     function showLoginForm($message = '', $oldInput = [])
@@ -39,8 +53,9 @@ class AuthController
         $email = trim($_POST['email']);
         $password = trim($_POST['password']);
         $loginResult = $this->authService->login($email, $password);
+
         if ($loginResult->status == true) {
-            // lưu thông tin cần thiết
+            // Đăng nhập thành công - lưu thông tin user vào session
             $_SESSION['user'] = [
                 'id' => $loginResult->user->id,
                 'fullname' => $loginResult->user->fullname,
@@ -50,8 +65,10 @@ class AuthController
             header('Location: /shoe-shop/public/');
             exit();
         } else {
+            // Đăng nhập thất bại - hiển thị thông báo lỗi
             $message = $loginResult->message;
-            require_once '../src/views/login.php';
+            $oldInput = ['email' => $email];
+            $this->showLoginForm($message, $oldInput);
         }
     }
     function logout()
