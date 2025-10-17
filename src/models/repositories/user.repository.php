@@ -114,16 +114,26 @@ class UserRepository
     {
         $query = "UPDATE " . $this->table . " SET reset_token = :token, reset_token_expires_at = :expires_at WHERE id = :id";
         $stmt = $this->conn->prepare($query);
-        return $stmt->execute([':token' => $token, ':expires_at' => $expiresAt, ':id' => $userId]);
+        $stmt->bindParam(":token", $token);
+        $stmt->bindParam(":expires_at", date('Y-m-d H:i:s', strtotime($expiresAt)));
+        $stmt->bindParam(":id", $userId);
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
     }
 
     public function findByResetToken($token)
     {
         $query = "SELECT * FROM " . $this->table . " WHERE reset_token = :token AND reset_token_expires_at > NOW() LIMIT 1";
         $stmt = $this->conn->prepare($query);
-        $stmt->execute([':token' => $token]);
-        $stmt->setFetchMode(PDO::FETCH_CLASS, 'User');
-        return $stmt->fetch();
+        $stmt->bindParam(":token", $token);
+        $stmt->execute();
+        if ($stmt->rowCount() > 0) {
+            $stmt->setFetchMode(PDO::FETCH_CLASS, 'User');
+            return $stmt->fetch();
+        }
+        return false;
     }
 
     public function resetPassword($userId, $newPassword)
@@ -131,6 +141,11 @@ class UserRepository
         $query = "UPDATE " . $this->table . " SET password = :password, reset_token = NULL, reset_token_expires_at = NULL WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
-        return $stmt->execute([':password' => $hashedPassword, ':id' => $userId]);
+        $stmt->bindParam(":password", $hashedPassword);
+        $stmt->bindParam(":id", $userId);
+        if ($stmt->execute()) {
+            return true;
+        }
+        return false;
     }
 }

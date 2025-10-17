@@ -350,7 +350,13 @@
                     <span><?= htmlspecialchars($errorMessage) ?></span>
                 </div>
             <?php endif; ?>
-
+            <?php if (isset($_SESSION['login_message'])): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span><?= htmlspecialchars($_SESSION['login_message']) ?></span>
+                </div>
+                <?php unset($_SESSION['login_message']); ?>
+            <?php endif; ?>
             <form action="/shoe-shop/public/login" method="POST" novalidate>
                 <div class="form-group">
                     <label for="email" class="form-label">Email</label>
