@@ -1,10 +1,13 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 class AuthMiddleware
 {
     function validateRegisterBody($data)
     {
-        $fullname = trim($data['fullname'] ?? '');
-        $email = trim($data['email'] ?? '');
+        $fullname = trim($data['fullname']);
+        $email = trim($data['email']);
         $password = trim($data['password']);
         $confirmPassword = trim($data['confirm_password']);
 
@@ -50,9 +53,7 @@ class AuthMiddleware
     public function requireAdmin()
     {
         // 1. Start session nếu chưa có
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+
 
         // 2. Yêu cầu đăng nhập trước
         $this->requireAuth();
@@ -67,9 +68,7 @@ class AuthMiddleware
 
     function requireAuth()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+
 
         if (!isset($_SESSION['user'])) {
             header('Location: /shoe-shop/public/login');
@@ -79,9 +78,7 @@ class AuthMiddleware
     }
     function redirectIfAuthenticated()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+
 
         if (isset($_SESSION['user']) && !empty($_SESSION['user'])) {
             header('Location: /shoe-shop/public/');

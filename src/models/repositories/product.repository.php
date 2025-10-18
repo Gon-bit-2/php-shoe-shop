@@ -19,13 +19,12 @@ class ProductRepository
             $query = "INSERT INTO products (name, slug, description, image_url, is_active)
               VALUES (:name, :slug, :description, :image_url, :is_active)";
             $stmt = $this->conn->prepare($query);
-            $stmt->execute([
-                ':name' => $product->name,
-                ':slug' => $product->slug,
-                ':description' => $product->description,
-                ':image_url' => $product->image_url,
-                ':is_active' => $product->is_active
-            ]);
+            $stmt->bindParam(':name', $product->name);
+            $stmt->bindParam(':slug', $product->slug);
+            $stmt->bindParam(':description', $product->description);
+            $stmt->bindParam(':image_url', $product->image_url);
+            $stmt->bindParam(':is_active', $product->is_active);
+            $stmt->execute();
             $productId = $this->conn->lastInsertId();
 
             // Bước 2: Xử lý danh mục

@@ -40,7 +40,6 @@ class ProductService
         // Kiểm tra xem có ít nhất một biến thể không
         if (empty($variantsData)) {
             // Trả về lỗi nếu không có biến thể nào được thêm
-            // Bạn có thể xử lý lỗi này ở Controller
             return false;
         }
 
@@ -156,7 +155,7 @@ class ProductService
         $product->slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $data['name'])));
         $product->description = $data['description'];
         $product->image_url = $imageUrl;
-        $product->is_active = isset($data['is_active']) ? 1 : 0;
+        $product->is_active = isset($data['is_active']) && $data['is_active'] == '1' ? 1 : 0;
 
         // Lấy thông tin danh mục và biến thể từ form
         $categoryIDs = $data['categories'] ?? [];
