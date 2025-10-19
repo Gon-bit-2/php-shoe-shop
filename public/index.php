@@ -274,9 +274,6 @@ switch ($path) {
         }
         break;
     case '/history':
-        // Middleware sẽ tự động kiểm tra đăng nhập vì route này nằm trong
-        // mảng 'protected' của file routes.php (nếu bạn đã cấu hình)
-        // Hoặc bạn có thể gọi trực tiếp: $authMiddleware->requireAuth();
         $controller = new OrderController($conn);
         $controller->showPurchaseHistory();
         break;
@@ -302,7 +299,6 @@ switch ($path) {
         if (preg_match('/^\/admin\/products\/edit\/(\d+)$/', $path, $matches)) {
             $controller = new ProductController($conn);
             $productId = $matches[1]; // Lấy ra ID từ URL
-
             if ($method == 'GET') {
                 $controller->getEditPage($productId); // Gọi hàm edit với ID vừa lấy được
             } elseif ($method == 'POST') {

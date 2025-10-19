@@ -59,7 +59,8 @@ class ProductService
         return [
             'products' => $products,
             'totalPages' => $totalPages,
-            'currentPage' => $page
+            'currentPage' => $page,
+            'totalProducts' => $totalProducts
         ];
     }
     function getProductById($id)

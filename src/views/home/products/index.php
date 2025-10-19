@@ -23,7 +23,7 @@
             <div class="banner-slider relative h-[80vh]">
                 <!-- Các slides -->
                 <div class="slide active absolute inset-0 transition-opacity duration-500">
-                    <img src="./images/banner/banner01.png" alt="Banner 1" class="w-full h-full object-cover opacity-50">
+                    <img src="./images/banner/banner01.png" alt="Banner 1" class="w-full h-full object-contain md:object-cover opacity-50">
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                         <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Bộ Sưu Tập Mới Nhất</h1>
                         <p class="text-lg md:text-xl mb-8 max-w-2xl">Khám phá những mẫu giày mới nhất, kết hợp hoàn hảo giữa phong cách và sự thoải mái.</p>
@@ -32,7 +32,7 @@
                 </div>
 
                 <div class="slide absolute inset-0 transition-opacity duration-500 opacity-0">
-                    <img src="./images/banner/banner-2.png" alt="Banner 2" class="w-full h-full object-cover opacity-50">
+                    <img src="./images/banner/banner-2.png" alt="Banner 2" class="w-full h-full object-contain md:object-cover opacity-50">
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                         <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Giày Thể Thao Cao Cấp</h1>
                         <p class="text-lg md:text-xl mb-8 max-w-2xl">Trải nghiệm sự thoải mái tuyệt đối.</p>
@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="slide absolute inset-0 transition-opacity duration-500 opacity-0">
-                    <img src="./images/banner/banner-3.png" alt="Banner 3" class="w-full h-full object-cover opacity-50">
+                    <img src="./images/banner/banner-3.png" alt="Banner 3" class="w-full h-full object-contain md:object-cover opacity-50">
                     <div class="absolute inset-0 flex flex-col items-center justify-center text-center p-4">
                         <h1 class="text-4xl md:text-6xl font-extrabold leading-tight mb-4">Phong Cách Thời Trang</h1>
                         <p class="text-lg md:text-xl mb-8 max-w-2xl">Tạo nên phong cách riêng của bạn.</p>

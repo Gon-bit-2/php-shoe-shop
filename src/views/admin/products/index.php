@@ -13,19 +13,21 @@
     <div class="container mx-auto mt-10 p-8">
         <h1 class="text-3xl font-bold mb-6">Danh sách Sản phẩm</h1>
 
-        <div class="mb-4">
+        <div class="mb-4 flex justify-between items-center">
             <a href="/shoe-shop/public/admin/products/create" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">Thêm sản phẩm mới</a>
+            <span class="text-gray-500 text-sm">Tổng số sản phẩm: <?= htmlspecialchars($totalProducts) ?></span>
         </div>
 
         <div class="bg-white shadow-md rounded-lg">
             <table class="min-w-full leading-normal">
                 <thead>
                     <tr>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Mã sản phẩm</th>
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Tên sản phẩm</th>
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Ảnh</th>
 
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Trạng thái</th>
-                        <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Số lượng</th>
+
                         <th class="px-5 py-3 border-b-2 border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Hành động</th>
                     </tr>
                 </thead>
@@ -37,6 +39,9 @@
                     <?php else: ?>
                         <?php foreach ($products as $product): ?>
                             <tr>
+                                <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
+                                    <p class="text-gray-900 whitespace-no-wrap"><?= htmlspecialchars($product->id) ?></p>
+                                </td>
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                                     <p class="text-gray-900 whitespace-no-wrap"><?= htmlspecialchars($product->name) ?></p>
                                 </td>

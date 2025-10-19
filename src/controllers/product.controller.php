@@ -56,7 +56,7 @@ class ProductController
         $products = $data['products'];
         $totalPages = $data['totalPages'];
         $currentPage = $data['currentPage'];
-
+        $totalProducts = $data['totalProducts'];
         require_once __DIR__ . '/../views/admin/products/index.php';
     }
     public function getEditPage($id, $errorMessage = '', $oldInput = [])

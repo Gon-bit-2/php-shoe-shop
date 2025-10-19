@@ -10,12 +10,19 @@ class ProductRepository
         $this->conn = $conn;
     }
 
+    /**
+     * Lưu sản phẩm
+     * @param Product $product
+     * @param int[] $categoryIDs
+     * @param array $variantsData
+     * @return bool
+     */
     public function save(Product $product, array $categoryIDs, array $variantsData)
     {
         try {
             $this->conn->beginTransaction();
 
-            // Bước 1: Lưu sản phẩm chính (không có price và stock nữa)
+            //lưu sản phẩm chính
             $query = "INSERT INTO products (name, slug, description, image_url, is_active)
               VALUES (:name, :slug, :description, :image_url, :is_active)";
             $stmt = $this->conn->prepare($query);
@@ -25,21 +32,21 @@ class ProductRepository
             $stmt->bindParam(':image_url', $product->image_url);
             $stmt->bindParam(':is_active', $product->is_active);
             $stmt->execute();
-            $productId = $this->conn->lastInsertId();
+            $productId = $this->conn->lastInsertId(); // lấy id sản phẩm vừa lưu
 
-            // Bước 2: Xử lý danh mục
+            //xử lý danh mục
             if (!empty($categoryIDs)) {
-                // Chuẩn bị câu lệnh MỘT LẦN bên ngoài vòng lặp
+                //chuẩn bị câu lệnh một lần bên ngoài vòng lặp
                 $mapQuery = "INSERT INTO product_category_map (product_id, category_id) VALUES (?, ?)";
                 $mapStmt = $this->conn->prepare($mapQuery);
                 foreach ($categoryIDs as $categoryID) {
-                    // Thực thi nhiều lần với dữ liệu khác nhau
+                    //thực thi nhiều lần với dữ liệu khác nhau
                     $mapStmt->execute([$productId, $categoryID]);
                 }
             }
 
-            // Bước 3: Xử lý các biến thể
-            // Chuẩn bị các câu lệnh MỘT LẦN bên ngoài vòng lặp
+            // Xử lý các biến thể
+            //chuẩn bị các câu lệnh một lần bên ngoài vòng lặp
             $variantQuery = "INSERT INTO product_variants (product_id, price, stock) VALUES (?, ?, ?)";
             $variantStmt = $this->conn->prepare($variantQuery);
 
@@ -47,7 +54,7 @@ class ProductRepository
             $vvStmt = $this->conn->prepare($vvQuery);
 
             foreach ($variantsData as $variant) {
-                // 3.1. Tạo dòng trong `product_variants`
+                //tạo biến thể trong `product_variants`
                 $variantStmt->execute([
                     $productId,
                     $variant['price'],
@@ -55,11 +62,11 @@ class ProductRepository
                 ]);
                 $variantId = $this->conn->lastInsertId();
 
-                // 3.2. Lấy ID của giá trị thuộc tính (Size và Màu)
+                //lấy ID Size và Màu
                 $sizeValueId = $this->findOrCreateAttributeValue(1, $variant['size']);
                 $colorValueId = $this->findOrCreateAttributeValue(2, $variant['color']);
 
-                // 3.3. Tạo liên kết trong `variant_values` (thực thi 2 lần)
+                //tạo liên kết trong `variant_values`
                 $vvStmt->execute([$variantId, $sizeValueId]);
                 $vvStmt->execute([$variantId, $colorValueId]);
             }
@@ -72,6 +79,10 @@ class ProductRepository
             return false;
         }
     }
+    /**
+     * Đếm số lượng sản phẩm
+     * @return int
+     */
     public function countAll()
     {
         $query = "SELECT COUNT(id) FROM products";
@@ -79,6 +90,12 @@ class ProductRepository
         $stmt->execute();
         return (int) $stmt->fetchColumn();
     }
+    /**
+     * Tìm tất cả sản phẩm
+     * @param int $limit
+     * @param int $offset
+     * @return Product[]
+     */
     function findAll($limit, $offset)
     {
         $query = "SELECT * FROM products ORDER BY created_at DESC LIMIT :limit OFFSET :offset";
@@ -89,9 +106,15 @@ class ProductRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
     }
+    /**
+     * Tìm giá trị thuộc tính đã tồn tại hoặc tạo mới
+     * @param int $attributeId
+     * @param string $value
+     * @return int
+     */
     public function findOrCreateAttributeValue($attributeId, $value)
     {
-        // Thử tìm giá trị thuộc tính đã tồn tại
+        // tìm giá trị thuộc tính đã tồn tại
         $query = "SELECT id FROM attribute_values WHERE attribute_id = :attribute_id AND `value` = :value";
         $stmt = $this->conn->prepare($query);
         // Sử dụng execute với mảng để an toàn và nhất quán
@@ -117,9 +140,14 @@ class ProductRepository
         }
     }
 
+    /**
+     * Tìm tất cả giá trị thuộc tính theo tên
+     * @param string $attributeName
+     * @return AttributeValue[]
+     */
     public function findAttributeValuesByName($attributeName)
     {
-        // Câu lệnh này JOIN 2 bảng attributes và attribute_values
+        //JOIN 2 bảng attributes và attribute_values
         // để tìm tất cả `value` thuộc về một `name` cụ thể
         $query = "SELECT av.id, av.value
               FROM attribute_values av
@@ -131,6 +159,11 @@ class ProductRepository
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'AttributeValue');
     }
 
+    /**
+     * Tìm sản phẩm theo ID
+     * @param int $id
+     * @return Product|null
+     */
     function findById($id)
     {
         if (empty($id) || !is_numeric($id)) {
@@ -145,6 +178,11 @@ class ProductRepository
 
         return $result === false ? null : $result;
     }
+    /**
+     * Tìm danh mục theo ID sản phẩm
+     * @param int $productId
+     * @return int[]
+     */
     function findCategoryByProductId($productId)
     {
         $query = "SELECT category_id FROM product_category_map WHERE product_id = :productId";
@@ -153,9 +191,14 @@ class ProductRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
+    /**
+     * Tìm các biến thể theo ID sản phẩm
+     * @param int $productId
+     * @return ProductVariant[]
+     */
     public function findVariantsByProductId($productId)
     {
-        // Đây là một câu lệnh SQL phức tạp để lấy tất cả thông tin cần thiết trong một lần truy vấn
+
         $query = "SELECT
                 pv.id, pv.price, pv.stock,
                 a.name AS attribute_name,
@@ -172,19 +215,13 @@ class ProductRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'ProductVariant');
     }
-    function getVariantDetails($variantId)
-    {
-        // (Đây là một cách làm đơn giản, có thể tối ưu bằng cách tạo hàm riêng trong Repository)
-        $query = "SELECT
-                    pv.id, pv.price, pv.stock, p.name AS product_name, p.image_url
-                  FROM product_variants pv
-                  JOIN products p ON pv.product_id = p.id
-                  WHERE pv.id = :id";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id", $variantId);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_CLASS, 'ProductVariant');
-    }
+    /**
+     * Cập nhật sản phẩm
+     * @param Product $product
+     * @param int[] $categoryIDs
+     * @param array $variantsData
+     * @return bool
+     */
     public function update(Product $product, array $categoryIDs, array $variantsData)
     {
         try {
@@ -207,30 +244,28 @@ class ProductRepository
             $stmt->bindParam(":is_active", $product->is_active);
             $stmt->execute();
 
-            //Cập nhật danh mục (xóa cũ, thêm mới)
-            $this->conn->prepare("DELETE FROM product_category_map WHERE product_id = ?")->execute([$product->id]);
+            //Cập nhật danh mục
+            $this->conn->prepare("DELETE FROM product_category_map WHERE product_id = ?")->execute([$product->id]); // xóa danh mục cũ
             if (!empty($categoryIDs)) {
-                $mapQuery = "INSERT INTO product_category_map (product_id, category_id) VALUES (?, ?)";
+                $mapQuery = "INSERT INTO product_category_map (product_id, category_id) VALUES (?, ?)"; // thêm danh mục mới
                 $mapStmt = $this->conn->prepare($mapQuery);
                 foreach ($categoryIDs as $categoryID) {
-                    $mapStmt->execute([$product->id, $categoryID]);
+                    $mapStmt->execute([$product->id, $categoryID]); // thêm danh mục mới
                 }
             }
-
             //Đồng bộ hóa các biến thể
-            $existingVariantIds = $this->getVariantIdsByProductId($product->id);
-            $submittedVariantIds = [];
-
+            $existingVariantIds = $this->getVariantIdsByProductId($product->id); // mảng để lưu id các biến thể cũ
+            $submittedVariantIds = []; // mảng để lưu id các biến thể mới
             foreach ($variantsData as $variant) {
                 $variantId = $variant['id'] ?? null;
 
                 if ($variantId) {
-                    // A. Biến thể đã có -> UPDATE
+                    //biến thể đã có -> UPDATE
                     $updateVariantQuery = "UPDATE product_variants SET price = ?, stock = ? WHERE id = ?";
                     $this->conn->prepare($updateVariantQuery)->execute([$variant['price'], $variant['stock'], $variantId]);
                     $submittedVariantIds[] = $variantId;
                 } else {
-                    // B. Biến thể mới -> INSERT
+                    //biến thể mới -> INSERT
                     $insertVariantQuery = "INSERT INTO product_variants (product_id, price, stock) VALUES (?, ?, ?)";
                     $this->conn->prepare($insertVariantQuery)->execute([$product->id, $variant['price'], $variant['stock']]);
                     $newVariantId = $this->conn->lastInsertId();
@@ -245,7 +280,7 @@ class ProductRepository
                 }
             }
 
-            //Tìm và xóa các biến thể đã bị admin xóa khỏi form
+            //tìm và xóa các biến thể đã bị admin xóa khỏi form
             $variantsToDelete = array_diff($existingVariantIds, $submittedVariantIds);
             if (!empty($variantsToDelete)) {
                 $deleteQuery = "DELETE FROM product_variants WHERE id IN (" . implode(',', array_fill(0, count($variantsToDelete), '?')) . ")";
@@ -262,12 +297,22 @@ class ProductRepository
     }
 
 
-    private function getVariantIdsByProductId($productId)
+    /**
+     * Tìm ID các biến thể theo ID sản phẩm
+     * @param int $productId
+     * @return int[]
+     */
+    public function getVariantIdsByProductId($productId)
     {
         $stmt = $this->conn->prepare("SELECT id FROM product_variants WHERE product_id = ?");
         $stmt->execute([$productId]);
         return $stmt->fetchAll(PDO::FETCH_COLUMN); // Lấy về mảng các ID
     }
+    /**
+     * Đếm số lượng sản phẩm với các điều kiện lọc
+     * @param array $filters
+     * @return int
+     */
     public function countWithFilters($filters = [])
     {
         $query = "SELECT COUNT(DISTINCT p.id)
@@ -302,7 +347,13 @@ class ProductRepository
         $stmt->execute($params);
         return (int) $stmt->fetchColumn();
     }
-    // Phương thức mới để tìm kiếm và lọc
+    /**
+     * Tìm kiếm và lọc sản phẩm
+     * @param array $filters
+     * @param int $limit
+     * @param int $offset
+     * @return Product[]
+     */
     public function findWithFilters($filters = [], $limit, $offset)
     {
         $searchTerm = $filters['search'] ?? '';
@@ -351,7 +402,7 @@ class ProductRepository
                 $params[':max_price'] = $maxPrice;
             }
         }
-        $query .= " GROUP BY p.id"; // GROUP BY luôn đứng trước ORDER BY
+        $query .= " GROUP BY p.id";
 
         switch ($sort) {
             case 'price_asc':
@@ -390,11 +441,13 @@ class ProductRepository
             return false;
         }
     }
+    /**
+     * Tìm tất cả sản phẩm active
+     * @return Product[]
+     */
     public function findAllProductActive()
     {
-        // Câu lệnh JOIN phức tạp để lấy thêm tên danh mục
-        // Chúng ta dùng LEFT JOIN để sản phẩm nào chưa có danh mục vẫn hiển thị
-        // GROUP_CONCAT để gộp nhiều tên danh mục vào một chuỗi
+        //một sản phẩm có thể có n<=>n danh mục
         $query = "SELECT p.*, GROUP_CONCAT(c.name SEPARATOR ', ') as category_names
               FROM products p
               LEFT JOIN product_category_map pcm ON p.id = pcm.product_id
@@ -407,6 +460,11 @@ class ProductRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Product');
     }
+    /**
+     * Tìm biến thể theo ID
+     * @param int $variantId
+     * @return ProductVariant|null
+     */
     public function findVariantById($variantId)
     {
         $query = "SELECT
@@ -425,6 +483,13 @@ class ProductRepository
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'ProductVariant');
         return $stmt->fetch();
     }
+    /**
+     * Tìm sản phẩm liên quan
+     * @param int[] $categoryIDs
+     * @param int $currentProductId
+     * @param int $limit
+     * @return Product[]
+     */
     public function findRelatedProducts($categoryIDs, $currentProductId, $limit = 4)
     {
         // check $categoryIDs

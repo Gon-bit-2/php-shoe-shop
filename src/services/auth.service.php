@@ -35,6 +35,9 @@ class AuthService
         if (!password_verify($password, $user->password)) {
             return (object)['message' => 'Mật khẩu không đúng', 'status' => false];
         }
+        if (!$user->is_active) {
+            return (object)['message' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.', 'status' => false];
+        }
         // if (headers_sent($file, $line)) {
         //     die("Lỗi: Headers đã được gửi đi tại file: $file ở dòng: $line");
         // }
