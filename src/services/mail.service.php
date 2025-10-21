@@ -12,14 +12,11 @@ require_once __DIR__ . '/../helper/status_helper.php';
 
 class MailService
 {
-
     /**
      * Gửi email thông báo trạng thái đơn hàng
      * @param mixed $orderDetails
      * @return bool
      */
-    // src/services/mail.service.php
-
     public function sendOrderStatusEmail($orderDetails)
     {
         if (!$orderDetails || !$orderDetails->status) return false;

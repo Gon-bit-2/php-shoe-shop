@@ -14,21 +14,18 @@ class CartService
 
     public function addToCart($variantId, $quantity)
     {
-        // Luôn đảm bảo session đã được bắt đầu
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
 
         $variant = $this->productRepository->findVariantById($variantId);
 
-        // --- BẮT ĐẦU SỬA LỖI ---
         if (!$variant) {
-            // Nếu không tìm thấy biến thể, hãy đặt một thông báo lỗi và quay lại
+            // Nếu không tìm thấy biến thể,  thông báo lỗi và quay lại
             $_SESSION['cart_error_message'] = "Lỗi: Không tìm thấy sản phẩm. Vui lòng thử lại.";
             header('Location: ' . $_SERVER['HTTP_REFERER']);
             exit();
         }
-        // --- KẾT THÚC SỬA LỖI ---
 
         $currentQuantityInCart = $_SESSION['cart'][$variantId]->quantity ?? 0;
         if ($variant->stock < ($quantity + $currentQuantityInCart)) {
@@ -54,10 +51,8 @@ class CartService
         exit();
     }
 
-    // Các hàm khác giữ nguyên...
     public function updateCartItemQuantity($variantId, $quantity)
     {
-        // Đảm bảo session đã được bắt đầu
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -82,7 +77,6 @@ class CartService
 
     public function removeCartItem($variantId)
     {
-        // Đảm bảo session đã được bắt đầu
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -92,7 +86,6 @@ class CartService
 
     public function getCartItems()
     {
-        // Đảm bảo session đã được bắt đầu
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
@@ -124,7 +117,7 @@ class CartService
             ];
             $_SESSION['cart_success_message'] = 'Áp dụng mã giảm giá thành công!';
         } else {
-            // Nếu thất bại, xóa voucher cũ (nếu có) và set lỗi
+            // Nếu thất bại, xóa voucher cũ  và set lỗi
             unset($_SESSION['cart_voucher']);
             $_SESSION['cart_error_message'] = $result['message'];
         }
@@ -159,7 +152,6 @@ class CartService
     }
     public function clearCart()
     {
-        // Đảm bảo session đã được bắt đầu
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }

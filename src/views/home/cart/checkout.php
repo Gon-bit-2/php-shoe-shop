@@ -15,7 +15,6 @@
         <h1 class="text-3xl font-bold text-center mb-8">Thông tin Thanh toán</h1>
 
         <?php
-        // Lấy lại chi tiết giỏ hàng để hiển thị tóm tắt đơn hàng
         $cartDetails = $this->cartService->getFinalCartDetails();
         $cartItems = $cartDetails->items;
         ?>

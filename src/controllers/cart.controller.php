@@ -11,7 +11,7 @@ class CartController
 
     function add()
     {
-        $variantId = $_POST['variant_id'] ?? null; // Đổi từ product_id sang variant_id
+        $variantId = $_POST['variant_id'] ?? null;
         $quantity = (int)($_POST['quantity'] ?? 1);
 
         if (!$variantId || $quantity <= 0) {
@@ -29,9 +29,6 @@ class CartController
         if (session_status() === PHP_SESSION_NONE) {
             session_start();
         }
-
-        // $cartItems = $this->cartService->getCartItems();
-        // $cartTotal = $this->cartService->getCartTotal();
         $cartDetails = $this->cartService->getFinalCartDetails();
         require_once __DIR__ . '/../views/home/cart/index.php';
     }

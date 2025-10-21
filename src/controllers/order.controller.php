@@ -39,13 +39,11 @@ class OrderController
             return;
         }
 
-        // Truyền thêm $paymentMethod vào service
+        // Tạo đơn hàng
         $result = $this->orderService->createOrder($userId, $customerName, $customerPhone, $customerAddress, $paymentMethod);
 
         if ($result['success']) {
-            // Sau này, bạn có thể kiểm tra $paymentMethod ở đây
-            // Nếu là 'bank_transfer', chuyển hướng đến trang hướng dẫn thanh toán
-            // Nếu là 'cod', chuyển hướng đến trang cảm ơn
+            // cảm ơn
             header('Location: /shoe-shop/public/order-success/' . $result['order_id']);
             exit();
         } else {
@@ -79,8 +77,6 @@ class OrderController
         // Gọi service để thực hiện cập nhật
         $result = $this->orderService->updateOrderStatus($id, $newStatus);
 
-        // Sau khi cập nhật, chuyển hướng admin quay lại chính trang chi tiết đơn hàng
-        // để họ thấy trạng thái đã được thay đổi
         header('Location: /shoe-shop/public/admin/orders/view/' . $id);
         exit();
     }
@@ -89,21 +85,21 @@ class OrderController
     {
         $userId = $_SESSION['user']['id'];
 
-        // Lấy danh sách đơn hàng (giữ nguyên)
+        // Lấy danh sách đơn hàng
         $orders = $this->orderService->getOrdersByUserId($userId);
 
-        // THÊM MỚI: Lấy danh sách các sản phẩm đang chờ được đánh giá
+        // Lấy danh sách các sản phẩm đang chờ được đánh giá
         $productsToReview = $this->orderService->getProductsAwaitingReview($userId);
 
-        // Nạp view và truyền cả 2 biến sang
+        // Nạp view và truyền các biến sang
         require_once __DIR__ . '/../views/home/history/index.php';
     }
     public function showOrderSuccessPage($orderId)
     {
-        // Lấy chi tiết đơn hàng để hiển thị
+        // Lấy chi tiết đơn hàng
         $order = $this->orderService->getOrderDetail($orderId)->order;
         if (!$order) {
-            // Xử lý nếu không tìm thấy đơn hàng
+            // không tìm thấy đơn hàng
             header('Location: /shoe-shop/public/');
             exit();
         }

@@ -13,9 +13,19 @@ class OrderService
         $this->conn = $conn;
         $this->orderRepository = new OrderRepository($conn);
         $this->cartService = new CartService($conn);
-        $this->mailService = new MailService($conn);
+        $this->mailService = new MailService();
     }
 
+    /**
+     * Tạo đơn hàng
+     * @param mixed $userId
+     * @param mixed $customerName
+     * @param mixed $customerPhone
+     * @param mixed $customerAddress
+     * @param mixed $paymentMethod
+     * @return array
+     * @throws Exception
+     */
     public function createOrder($userId, $customerName, $customerPhone, $customerAddress, $paymentMethod)
     {
         $cartDetails = $this->cartService->getFinalCartDetails();
@@ -48,7 +58,6 @@ class OrderService
             }
 
             if ($cartDetails->voucher_code) {
-                // Chúng ta cần require_once repository ở đây vì nó không được nạp tự động
                 require_once __DIR__ . '/../models/repositories/voucher.repository.php';
                 $voucherRepo = new VoucherRepository($this->conn);
                 $voucherRepo->incrementUsedCount($cartDetails->voucher_code);
@@ -57,10 +66,7 @@ class OrderService
             $this->conn->commit();
             $this->cartService->clearCart();
 
-            // Gửi email xác nhận ngay sau khi tạo đơn hàng thành công với trạng thái 'pending'
-            // 1. Lấy chi tiết đơn hàng vừa tạo
             $orderDetails = $this->getOrderDetail($orderId);
-            // 2. Gửi chi tiết đó cho MailService
             $this->mailService->sendOrderStatusEmail($orderDetails);
 
             return ['success' => true, 'order_id' => $orderId];
@@ -101,11 +107,9 @@ class OrderService
 
         $result = $this->orderRepository->updateStatus($orderId, $newStatus);
 
-        // Chỉ gửi email nếu cập nhật thành công VÀ trạng thái thực sự thay đổi
+        //  gửi email nếu cập nhật thành công
         if ($result && $newStatus !== $oldStatus && in_array($newStatus, ['shipped', 'completed', 'cancelled'])) {
-            // 1. Lấy chi tiết đơn hàng sau khi cập nhật
             $orderDetails = $this->getOrderDetail($orderId);
-            // 2. Gửi chi tiết đó cho MailService
             $this->mailService->sendOrderStatusEmail($orderDetails);
         }
 

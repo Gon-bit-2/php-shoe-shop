@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 require_once '../src/models/repositories/database.php';
-
+require_once '../src/models/productVariant.php';
 // Middleware
 require_once '../src/middleware/auth.middleware.php';
 require_once '../src/middleware/product.middleware.php';
@@ -366,7 +366,7 @@ switch ($path) {
             $controller->addReview($productId);
             break;
         }
-        //
+        //admin update status order
         if (preg_match('/^\/admin\/orders\/update-status\/(\d+)$/', $path, $matches) && $method == 'POST') {
             $controller = new OrderController($conn);
             $orderId = $matches[1];

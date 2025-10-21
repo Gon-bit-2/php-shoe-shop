@@ -66,9 +66,16 @@
                                         </svg>
                                     </button>
                                 </form>
+
                             </div>
                         </div>
                     <?php endforeach; ?>
+                    <form method="POST" action="/shoe-shop/public/cart/clear" class="inline-block">
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+                            onclick="return confirm('Bạn có chắc muốn xóa tất cả sản phẩm trong giỏ hàng?')">
+                            Xóa tất cả
+                        </button>
+                    </form>
                 </div>
 
                 <div class="w-full lg:w-1/3">
