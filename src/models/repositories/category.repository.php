@@ -10,9 +10,13 @@ class CategoryRepository
         $this->conn = $conn;
     }
 
-    public function findAll()
+    public function findAll($activeOnly = false)
     {
-        $query = "SELECT * FROM categories ORDER BY name ASC";
+        if ($activeOnly) {
+            $query = "SELECT * FROM categories WHERE is_active = 1 ORDER BY name ASC";
+        } else {
+            $query = "SELECT * FROM categories ORDER BY name ASC";
+        }
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Category');
@@ -50,13 +54,5 @@ class CategoryRepository
             ':image_url' => $category->image_url,
             ':is_active' => $category->is_active,
         ]);
-    }
-
-    public function delete($id)
-    {
-        // (Lưu ý: Cần xử lý các sản phẩm thuộc danh mục này trước khi xóa)
-        $query = "DELETE FROM categories WHERE id = :id";
-        $stmt = $this->conn->prepare($query);
-        return $stmt->execute([':id' => $id]);
     }
 }

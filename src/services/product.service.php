@@ -15,11 +15,11 @@ class ProductService
     }
     public function getAllCategories()
     {
-        return $this->categoryRepository->findAll();
+        return $this->categoryRepository->findAll(true);
     }
     public function createProduct($data)
     {
-        // Xử lý ảnh upload (giữ nguyên)
+        // Xử lý ảnh upload
         $imageUrl = null;
         if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
             $imageUrl = $this->handleImageUpload($_FILES['image']);

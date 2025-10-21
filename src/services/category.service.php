@@ -13,7 +13,7 @@ class CategoryService
 
     public function getAllCategories()
     {
-        return $this->categoryRepository->findAll();
+        return $this->categoryRepository->findAll(false);
     }
 
     public function getCategoryById($id)
