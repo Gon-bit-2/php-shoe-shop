@@ -7,7 +7,7 @@ class ProductMiddleware
         $description = $data['description'] ?? '';
         $categories = $data['categories'] ?? [];
 
-        $variants = $data['variants'] ?? []; // Lấy mảng các biến thể
+        $variants = $data['variants'] ?? [];
 
         if (empty($name)) {
             return 'Tên sản phẩm không được để trống!';
@@ -21,7 +21,6 @@ class ProductMiddleware
             return 'Bạn phải chọn ít nhất một danh mục cho sản phẩm!';
         }
 
-        // Phải có ít nhất một biến thể được tạo
         if (empty($variants)) {
             return 'Bạn phải tạo ít nhất một biến thể (Size/Màu) cho sản phẩm!';
         }
@@ -37,6 +36,6 @@ class ProductMiddleware
             }
         }
 
-        return false; // Trả về false nếu không có lỗi
+        return false;
     }
 }

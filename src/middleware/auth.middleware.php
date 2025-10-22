@@ -52,13 +52,12 @@ class AuthMiddleware
     }
     public function requireAdmin()
     {
-        // 1. Start session nếu chưa có
 
 
-        // 2. Yêu cầu đăng nhập trước
+        // Yêu cầu đăng nhập trước
         $this->requireAuth();
 
-        // 3. Kiểm tra vai trò trong session
+        //  vai trò trong session
         if (!isset($_SESSION['user']['role_id']) || $_SESSION['user']['role_id'] != 1) {
             http_response_code(403);
             require_once __DIR__ . '/../views/errors/403.php';
@@ -88,8 +87,7 @@ class AuthMiddleware
     function applyGlobalMiddleware($path)
     {
         $routes = require_once '../src/config/routes.php';
-        // Kiểm tra nếu là route admin
-        // strpos($path, '/admin') === 0 có nghĩa là "$path bắt đầu bằng '/admin'"
+        //admin
         if (strpos($path, '/admin') === 0) {
             $this->requireAdmin(); // Áp dụng chốt bảo vệ admin
         }

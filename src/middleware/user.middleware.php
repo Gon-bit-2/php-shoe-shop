@@ -44,7 +44,7 @@ class UserMiddleware
         $currentPassword = trim($data['current_password'] ?? '');
         $confirmPassword = trim($data['confirm_password'] ?? '');
 
-        // Kiểm tra họ tên
+        //check họ tên
         if (empty($fullname)) {
             return 'Họ và tên không được để trống!';
         }
@@ -55,7 +55,7 @@ class UserMiddleware
             return 'Họ và tên không được quá 100 ký tự!';
         }
 
-        // Kiểm tra mật khẩu nếu người dùng muốn đổi
+        //check mật khẩu
         if (!empty($newPassword)) {
             if (empty($currentPassword)) {
                 return 'Vui lòng nhập mật khẩu hiện tại!';
@@ -68,6 +68,6 @@ class UserMiddleware
             }
         }
 
-        return false; // Không có lỗi
+        return false;
     }
 }

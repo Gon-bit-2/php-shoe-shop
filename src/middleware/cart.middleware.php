@@ -6,7 +6,6 @@ class CartMiddleware
         $variantId = $data['variant_id'] ?? null;
         $quantity = $data['quantity'] ?? null;
 
-        // Kiểm tra variant_id
         if (empty($variantId)) {
             return 'Vui lòng chọn phiên bản sản phẩm!';
         }
@@ -14,7 +13,6 @@ class CartMiddleware
             return 'Phiên bản sản phẩm không hợp lệ!';
         }
 
-        // Kiểm tra quantity
         if (empty($quantity)) {
             return 'Số lượng không được để trống!';
         }
@@ -33,7 +31,6 @@ class CartMiddleware
         $variantId = $data['variant_id'] ?? null;
         $quantity = $data['quantity'] ?? null;
 
-        // Kiểm tra variant_id
         if (empty($variantId)) {
             return 'Phiên bản sản phẩm không hợp lệ!';
         }
@@ -41,7 +38,6 @@ class CartMiddleware
             return 'Phiên bản sản phẩm không hợp lệ!';
         }
 
-        // Kiểm tra quantity
         if (!isset($quantity) || $quantity === '') {
             return 'Số lượng không được để trống!';
         }

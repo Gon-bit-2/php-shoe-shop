@@ -16,26 +16,26 @@ class CategoryMiddleware
             return 'Tên danh mục không được quá 100 ký tự!';
         }
 
-        // Kiểm tra file upload nếu có
+        //file upload
         if ($file && isset($file['error']) && $file['error'] !== UPLOAD_ERR_NO_FILE) {
             if ($file['error'] !== UPLOAD_ERR_OK) {
                 return 'Có lỗi xảy ra khi upload ảnh!';
             }
 
-            // Kiểm tra định dạng file
+            //check định dạng file
             $allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
             $fileType = $file['type'];
             if (!in_array($fileType, $allowedTypes)) {
                 return 'Chỉ chấp nhận file ảnh định dạng JPG, PNG, GIF!';
             }
 
-            // Kiểm tra kích thước file (max 2MB)
+            //check kích thước file
             $maxSize = 2 * 1024 * 1024; // 2MB
             if ($file['size'] > $maxSize) {
                 return 'Kích thước ảnh không được vượt quá 2MB!';
             }
         }
 
-        return false; // Không có lỗi
+        return false;
     }
 }

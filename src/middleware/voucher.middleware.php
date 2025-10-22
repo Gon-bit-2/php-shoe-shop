@@ -43,12 +43,12 @@ class VoucherMiddleware
             return 'Số lượng voucher phải là số nguyên dương!';
         }
 
-        // Kiểm tra giá trị đơn hàng tối thiểu
+        //check giá trị đơn hàng tối thiểu
         if (!is_numeric($minSpend) || $minSpend < 0) {
             return 'Giá trị đơn hàng tối thiểu không hợp lệ!';
         }
 
-        // Kiểm tra ngày bắt đầu và hết hạn
+        //check ngày bắt đầu và hết hạn
         if (!empty($startsAt) && !$this->isValidDateTime($startsAt)) {
             return 'Ngày bắt đầu không hợp lệ!';
         }
@@ -64,7 +64,7 @@ class VoucherMiddleware
         return false; // Không có lỗi
     }
 
-    // SỬA HÀM NÀY - Hỗ trợ cả datetime-local và date
+    //check ngày bắt đầu và hết hạn
     private function isValidDateTime($datetime)
     {
         // Thử validate với định dạng datetime-local (Y-m-d\TH:i)

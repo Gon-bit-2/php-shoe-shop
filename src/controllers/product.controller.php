@@ -157,24 +157,18 @@ class ProductController
     }
     public function addReview($productId)
     {
-        // 1. Kiểm tra đăng nhập
         if (!isset($_SESSION['user']['id'])) {
-            // Controller vẫn chịu trách nhiệm điều hướng
             header('Location: /shoe-shop/public/login');
             exit();
         }
 
-        // 2. Lấy dữ liệu từ request
         $userId = $_SESSION['user']['id'];
         $orderId = $_POST['order_id'] ?? null;
         $rating = $_POST['rating'] ?? 0;
         $comment = $_POST['comment'] ?? '';
 
-        // 3. Giao toàn bộ việc xử lý cho Service
         $result = $this->reviewService->createReview($productId, $userId, $orderId, $rating, $comment);
 
-        // 4. Dựa vào kết quả từ Service để điều hướng
-        // Ví dụ: Lưu thông báo vào session để hiển thị cho người dùng
         $_SESSION['flash_message'] = $result['message'];
 
         header('Location: /shoe-shop/public/product/' . $productId);

@@ -8,7 +8,6 @@ class OrderMiddleware
         $customerAddress = trim($data['customer_address'] ?? '');
         $paymentMethod = trim($data['payment_method'] ?? '');
 
-        // Kiểm tra tên khách hàng
         if (empty($customerName)) {
             return 'Tên người nhận không được để trống!';
         }
@@ -19,16 +18,15 @@ class OrderMiddleware
             return 'Tên người nhận không được quá 100 ký tự!';
         }
 
-        // Kiểm tra số điện thoại
         if (empty($customerPhone)) {
             return 'Số điện thoại không được để trống!';
         }
-        // Định dạng số điện thoại Việt Nam: 10-11 số, bắt đầu bằng 0
+        //
         if (!preg_match('/^0[0-9]{9,10}$/', $customerPhone)) {
             return 'Số điện thoại không đúng định dạng (10-11 số, bắt đầu bằng 0)!';
         }
 
-        // Kiểm tra địa chỉ
+        // check địa chỉ
         if (empty($customerAddress)) {
             return 'Địa chỉ giao hàng không được để trống!';
         }
@@ -47,6 +45,6 @@ class OrderMiddleware
             return 'Phương thức thanh toán không hợp lệ!';
         }
 
-        return false; // Không có lỗi
+        return false;
     }
 }

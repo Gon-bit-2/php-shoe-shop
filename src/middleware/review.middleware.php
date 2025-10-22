@@ -7,7 +7,7 @@ class ReviewMiddleware
         $comment = trim($data['comment'] ?? '');
         $orderId = $data['order_id'] ?? null;
 
-        // Kiểm tra rating
+        //check rating
         if (empty($rating)) {
             return 'Vui lòng chọn số sao đánh giá!';
         }
@@ -15,7 +15,7 @@ class ReviewMiddleware
             return 'Đánh giá phải từ 1 đến 5 sao!';
         }
 
-        // Kiểm tra comment
+        //check comment
         if (empty($comment)) {
             return 'Nội dung đánh giá không được để trống!';
         }
@@ -26,7 +26,6 @@ class ReviewMiddleware
             return 'Nội dung đánh giá không được quá 1000 ký tự!';
         }
 
-        // Kiểm tra order_id
         if (empty($orderId)) {
             return 'Thông tin đơn hàng không hợp lệ!';
         }
@@ -34,6 +33,6 @@ class ReviewMiddleware
             return 'Thông tin đơn hàng không hợp lệ!';
         }
 
-        return false; // Không có lỗi
+        return false;
     }
 }

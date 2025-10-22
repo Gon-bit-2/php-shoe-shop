@@ -98,7 +98,6 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- Hiển thị trạng thái hàng ở giữa Size và Màu sắc (ẩn ban đầu) -->
                 <div id="variant-stock-status" class="hidden mb-4 p-3 rounded-lg border text-center">
                     <span class="font-semibold">Vui lòng chọn size và màu</span>
                 </div>
@@ -125,7 +124,6 @@
                         Chọn Size và Màu
                     </button>
                 </form>
-                <!-- #region -->
                 <div class="mt-6 border-t border-b py-4 grid grid-cols-2 gap-4">
                     <div class="flex items-center text-sm text-gray-600">
                         <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -153,7 +151,7 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-4">Đánh giá từ khách hàng</h2>
 
             <?php
-            // PHP tính toán tóm tắt đánh giá (giữ nguyên)
+            // tính *
             $totalReviews = count($reviews);
             $averageRating = 0;
             $ratingCounts = [5 => 0, 4 => 0, 3 => 0, 2 => 0, 1 => 0];
