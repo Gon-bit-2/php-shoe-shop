@@ -11,7 +11,7 @@ class DashboardController
     }
 
     public function index()
-    { // Gọi service để lấy toàn bộ dữ liệu
+    {
         $dashboardData = $this->dashboardService->getDashboardData();
         // Chỉ cần nạp file view của dashboard
         require_once __DIR__ . '/../views/admin/dashBoards/dashboard.php';

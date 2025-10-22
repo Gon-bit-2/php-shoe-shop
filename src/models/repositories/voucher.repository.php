@@ -9,13 +9,16 @@ class VoucherRepository
     {
         $this->conn = $conn;
     }
+    /**
+     * Lưu voucher
+     * @param Voucher $voucher
+     */
     public function save(Voucher $voucher)
     {
         $query = "INSERT INTO vouchers (code, type, value, min_spend, quantity, starts_at, expires_at, is_active)
                   VALUES (:code, :type, :value, :min_spend, :quantity, :starts_at, :expires_at, :is_active)";
         $stmt = $this->conn->prepare($query);
 
-        // Chuyển đổi ngày tháng về đúng định dạng Y-m-d H:i:s cho MySQL
         $starts_at_formatted = !empty($voucher->starts_at) ? date('Y-m-d H:i:s', strtotime($voucher->starts_at)) : null;
         $expires_at_formatted = !empty($voucher->expires_at) ? date('Y-m-d H:i:s', strtotime($voucher->expires_at)) : null;
         $stmt->bindParam(":code", $voucher->code);
@@ -28,6 +31,10 @@ class VoucherRepository
         $stmt->bindParam(":is_active", $voucher->is_active);
         return $stmt->execute();
     }
+    /**
+     * Lấy tất cả các voucher
+     * @return array
+     */
     public function findAll()
     {
         $query = "SELECT * FROM vouchers ORDER BY created_at DESC";
@@ -35,6 +42,11 @@ class VoucherRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Voucher');
     }
+    /**
+     * Lấy voucher theo code
+     * @param string $code
+     * @return Voucher
+     */
     public function findByCode($code)
     {
         $query = "SELECT * FROM vouchers WHERE code = :code LIMIT 1";
@@ -43,6 +55,11 @@ class VoucherRepository
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Voucher');
         return $stmt->fetch();
     }
+    /**
+     * Lấy voucher theo id
+     * @param int $id
+     * @return Voucher
+     */
     public function findById($id)
     {
         $query = "SELECT * FROM vouchers WHERE id = :id LIMIT 1";
@@ -52,6 +69,11 @@ class VoucherRepository
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'Voucher');
         return $stmt->fetch();
     }
+    /**
+     * Cập nhật voucher
+     * @param Voucher $voucher
+     * @return boolean
+     */
     public function update(Voucher $voucher)
     {
         $query = "UPDATE vouchers SET
@@ -79,6 +101,11 @@ class VoucherRepository
         $stmt->bindParam(":is_active", $voucher->is_active);
         return $stmt->execute();
     }
+    /**
+     * Tăng số lượt khi sử dụng voucher
+     * @param string $code
+     * @return boolean
+     */
     public function incrementUsedCount($code)
     {
         $query = "UPDATE vouchers SET used_count = used_count + 1 WHERE code = :code";
@@ -86,6 +113,10 @@ class VoucherRepository
         $stmt->bindParam(":code", $code);
         return $stmt->execute();
     }
+    /**
+     * Lấy các voucher hoạt động
+     * @return array
+     */
     public function findActiveVouchers()
     {
         $now = date('Y-m-d H:i:s');

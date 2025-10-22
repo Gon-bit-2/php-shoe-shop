@@ -10,14 +10,10 @@ class DashboardService
         $this->orderRepository = new OrderRepository($conn);
     }
 
-    /**
-     * Lấy tất cả dữ liệu cần thiết cho trang dashboard.
-     */
     public function getDashboardData()
     {
         $stats = $this->orderRepository->getDashboardStats();
-        $topProducts = $this->orderRepository->getTopSellingProducts(5); // Lấy top 5 sản phẩm
-
+        $topProducts = $this->orderRepository->getTopSellingProducts(4); //4sp
         return (object)[
             'stats' => $stats,
             'topProducts' => $topProducts

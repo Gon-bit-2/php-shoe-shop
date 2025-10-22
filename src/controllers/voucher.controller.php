@@ -10,7 +10,6 @@ class VoucherController
         $this->voucherService = new VoucherService($conn);
     }
 
-    // Hiển thị danh sách voucher
     public function index()
     {
         $vouchers = $this->voucherService->getAllVouchers();
@@ -21,10 +20,8 @@ class VoucherController
         require_once __DIR__ . '/../views/admin/voucher/create.php';
     }
 
-    // Xử lý lưu voucher mới
     public function store()
     {
-        // (Chúng ta sẽ thêm validation ở bước sau)
         $result = $this->voucherService->createVoucher($_POST);
 
         if ($result) {
@@ -45,7 +42,6 @@ class VoucherController
         require_once __DIR__ . '/../views/admin/voucher/edit.php';
     }
 
-    // Xử lý cập nhật voucher
     public function update($id)
     {
         $result = $this->voucherService->updateVoucher($id, $_POST);

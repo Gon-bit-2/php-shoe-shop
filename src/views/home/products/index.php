@@ -315,8 +315,25 @@
         autoSlide();
     }
 
-    // Khởi động auto slide
     autoSlide();
+
+    //
+    function copyVoucherCode(code) {
+        const tempInput = document.createElement('input');
+        tempInput.value = code;
+        document.body.appendChild(tempInput);
+
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+
+        document.execCommand('copy');
+
+        document.body.removeChild(tempInput);
+
+        alert('Đã sao chép mã voucher: ' + code);
+
+
+    }
 </script>
 
 </html>

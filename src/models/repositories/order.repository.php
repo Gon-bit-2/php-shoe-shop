@@ -255,7 +255,7 @@ class OrderRepository
      * @return array
      * @throws Exception
      */
-    public function getTopSellingProducts($limit = 5)
+    public function getTopSellingProducts($limit = 4)
     {
 
         $query = "SELECT
