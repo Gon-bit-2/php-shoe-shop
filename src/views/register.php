@@ -493,13 +493,11 @@
                 const confirmPassword = confirmPasswordInput.value;
                 let isValid = true;
 
-                // Clear previous errors
                 passwordError.classList.remove('show');
                 confirmPasswordError.classList.remove('show');
                 passwordInput.classList.remove('error');
                 confirmPasswordInput.classList.remove('error');
 
-                // Validate password length
                 if (password.length > 0 && password.length < 6) {
                     passwordError.textContent = 'Mật khẩu phải có ít nhất 6 ký tự!';
                     passwordError.classList.add('show');
@@ -507,7 +505,6 @@
                     isValid = false;
                 }
 
-                // Validate password confirmation
                 if (confirmPassword.length > 0 && password !== confirmPassword) {
                     confirmPasswordError.textContent = 'Mật khẩu xác nhận không khớp!';
                     confirmPasswordError.classList.add('show');
@@ -518,7 +515,6 @@
                 return isValid;
             }
 
-            // Real-time validation
             passwordInput.addEventListener('input', function() {
                 checkPasswordStrength(this.value);
                 validatePassword();
@@ -526,14 +522,12 @@
 
             confirmPasswordInput.addEventListener('input', validatePassword);
 
-            // Form submission validation
             form.addEventListener('submit', function(e) {
                 if (!validatePassword()) {
                     e.preventDefault();
                 }
             });
 
-            // Add floating effect
             document.querySelectorAll('.form-input').forEach(input => {
                 input.addEventListener('focus', function() {
                     this.parentElement.style.transform = 'scale(1.01)';

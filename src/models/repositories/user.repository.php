@@ -9,6 +9,10 @@ class UserRepository
     {
         $this->conn = $conn;
     }
+    /**
+     * Tìm kiếm email đã tồn tại
+     * @param string $email
+     */
     function findByEmail($email)
     {
         $query = "SELECT id FROM " . $this->table . " WHERE email=:email LIMIT 1";
@@ -23,6 +27,10 @@ class UserRepository
         }
         return false;
     }
+    /**
+     * Tìm kiếm email
+     * @param string $email
+     */
     function findUserByEmail($email)
     {
         // Lấy tất cả các cột
@@ -38,6 +46,10 @@ class UserRepository
         }
         return false;
     }
+    /**
+     * Lưu user
+     * @param User $user
+     */
     function save(User $user)
     {
         $query = "INSERT INTO " . $this->table . "(fullname,email,password,role_id,created_at) VALUES (:fullname,:email,:password,:role_id,:created_at)";
@@ -60,6 +72,10 @@ class UserRepository
         }
         return false;
     }
+    /**
+     * Lấy tất cả các user
+     *
+     */
     public function findAll()
     {
         $query = "SELECT u.id, u.fullname, u.email, u.role_id, u.is_active, r.name as role_name
@@ -70,28 +86,31 @@ class UserRepository
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_OBJ);
     }
-
+    /**
+     * Lấy user theo id
+     * @param int $id
+     */
     public function findById($id)
     {
-        // Câu lệnh này sẽ lấy cả mật khẩu, cần thiết cho việc đổi mật khẩu
         $query = "SELECT * FROM " . $this->table . " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
         $stmt->execute([':id' => $id]);
         $stmt->setFetchMode(PDO::FETCH_CLASS, 'User');
         return $stmt->fetch();
     }
-
+    /**
+     * Cập nhật user
+     * @param User $user
+     */
     public function update(User $user)
     {
-        // Tách biệt việc cập nhật mật khẩu để an toàn hơn
         if (property_exists($user, 'password') && !empty($user->password) && strlen($user->password) < 60) {
-            // Giả định mật khẩu chưa hash sẽ ngắn hơn 60 ký tự
             $user->password = password_hash($user->password, PASSWORD_DEFAULT);
         }
-
+        // Chỉ thêm password vào câu query nếu có
         $query = "UPDATE " . $this->table . "
                   SET fullname = :fullname, email = :email, role_id = :role_id, is_active = :is_active"
-            . (!empty($user->password) ? ", password = :password" : "") . // Chỉ thêm password vào câu query nếu có
+            . (!empty($user->password) ? ", password = :password" : "") .
             " WHERE id = :id";
 
         $stmt = $this->conn->prepare($query);
@@ -110,6 +129,12 @@ class UserRepository
 
         return $stmt->execute($params);
     }
+    /**
+     * Lưu token reset password
+     * @param int $userId
+     * @param string $token
+     * @param string $expiresAt
+     */
     public function saveResetToken($userId, $token, $expiresAt)
     {
         $query = "UPDATE " . $this->table . " SET reset_token = :token, reset_token_expires_at = :expires_at WHERE id = :id";
@@ -123,6 +148,10 @@ class UserRepository
         return false;
     }
 
+    /**
+     * Tìm kiếm user theo token reset password
+     * @param string $token
+     */
     public function findByResetToken($token)
     {
         $query = "SELECT * FROM " . $this->table . " WHERE reset_token = :token AND reset_token_expires_at > NOW() LIMIT 1";
@@ -136,6 +165,11 @@ class UserRepository
         return false;
     }
 
+    /**
+     * Reset password
+     * @param int $userId
+     * @param string $newPassword
+     */
     public function resetPassword($userId, $newPassword)
     {
         $query = "UPDATE " . $this->table . " SET password = :password, reset_token = NULL, reset_token_expires_at = NULL WHERE id = :id";

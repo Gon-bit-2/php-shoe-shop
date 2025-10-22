@@ -32,7 +32,7 @@ class ProductRepository
             $stmt->bindParam(':image_url', $product->image_url);
             $stmt->bindParam(':is_active', $product->is_active);
             $stmt->execute();
-            $productId = $this->conn->lastInsertId(); // lấy id sản phẩm vừa lưu
+            $productId = $this->conn->lastInsertId();
 
             //xử lý danh mục
             if (!empty($categoryIDs)) {
@@ -45,8 +45,7 @@ class ProductRepository
                 }
             }
 
-            // Xử lý các biến thể
-            //chuẩn bị các câu lệnh một lần bên ngoài vòng lặp
+
             $variantQuery = "INSERT INTO product_variants (product_id, price, stock) VALUES (?, ?, ?)";
             $variantStmt = $this->conn->prepare($variantQuery);
 
@@ -114,10 +113,9 @@ class ProductRepository
      */
     public function findOrCreateAttributeValue($attributeId, $value)
     {
-        // tìm giá trị thuộc tính đã tồn tại
+        //find thuộc tính tồn tại
         $query = "SELECT id FROM attribute_values WHERE attribute_id = :attribute_id AND `value` = :value";
         $stmt = $this->conn->prepare($query);
-        // Sử dụng execute với mảng để an toàn và nhất quán
         $stmt->execute([
             ':attribute_id' => $attributeId,
             ':value' => $value
@@ -125,10 +123,8 @@ class ProductRepository
         $result = $stmt->fetchColumn();
 
         if ($result) {
-            // Nếu đã có, trả về ID
             return $result;
         } else {
-            // Nếu chưa có, tạo mới và trả về ID
             $insertQuery = "INSERT INTO attribute_values (attribute_id, `value`) VALUES (:attribute_id, :value)";
             $insertStmt = $this->conn->prepare($insertQuery);
             // Sử dụng execute với mảng
@@ -147,8 +143,7 @@ class ProductRepository
      */
     public function findAttributeValuesByName($attributeName)
     {
-        //JOIN 2 bảng attributes và attribute_values
-        // để tìm tất cả `value` thuộc về một `name` cụ thể
+
         $query = "SELECT av.id, av.value
               FROM attribute_values av
               JOIN attributes a ON av.attribute_id = a.id
@@ -253,7 +248,7 @@ class ProductRepository
                     $mapStmt->execute([$product->id, $categoryID]); // thêm danh mục mới
                 }
             }
-            //Đồng bộ hóa các biến thể
+
             $existingVariantIds = $this->getVariantIdsByProductId($product->id); // mảng để lưu id các biến thể cũ
             $submittedVariantIds = []; // mảng để lưu id các biến thể mới
             foreach ($variantsData as $variant) {
@@ -280,7 +275,7 @@ class ProductRepository
                 }
             }
 
-            //tìm và xóa các biến thể đã bị admin xóa khỏi form
+            //tìm và xóa các biến thể
             $variantsToDelete = array_diff($existingVariantIds, $submittedVariantIds);
             if (!empty($variantsToDelete)) {
                 $deleteQuery = "DELETE FROM product_variants WHERE id IN (" . implode(',', array_fill(0, count($variantsToDelete), '?')) . ")";
@@ -322,7 +317,6 @@ class ProductRepository
               WHERE p.is_active = 1";
         $params = [];
 
-        // Thêm các điều kiện lọc
         if (!empty($filters['search'])) {
             $query .= " AND p.name LIKE :search";
             $params[':search'] = '%' . $filters['search'] . '%';
@@ -361,7 +355,7 @@ class ProductRepository
         $priceRange = $filters['price'] ?? null;
         $sort = $filters['sort'] ?? 'newest';
 
-        //  chọn p.* và thêm một trường mới 'price' là giá MIN từ các biến thể
+        //  chọn p.* và 'price'
         $query = "SELECT p.*, MIN(pv.price) as price
               FROM products p
               LEFT JOIN product_category_map pcm ON p.id = pcm.product_id
@@ -378,26 +372,22 @@ class ProductRepository
         }
 
         if (!empty($categoryId)) {
-            // Thay đổi điều kiện để không gây lỗi ambiguous column
             $query .= " AND pcm.category_id = :category_id";
             $params[':category_id'] = $categoryId;
         }
 
-        // Lọc giá bây giờ hoạt động trên giá của các biến thể
+        // lọc giá trên giá của các biến thể
         if (!empty($priceRange)) {
             $priceParts = explode('-', $priceRange);
             $minPrice = $priceParts[0] ?? 0;
             $maxPrice = $priceParts[1] ?? null;
 
-            // Chúng ta sẽ lọc dựa trên giá của các biến thể
             if (is_numeric($minPrice)) {
-                // Sửa đổi để lọc trên bảng pv
                 $query .= " AND pv.price >= :min_price";
                 $params[':min_price'] = $minPrice;
             }
 
             if (is_numeric($maxPrice)) {
-                // Sửa đổi để lọc trên bảng pv
                 $query .= " AND pv.price <= :max_price";
                 $params[':max_price'] = $maxPrice;
             }
@@ -406,12 +396,12 @@ class ProductRepository
 
         switch ($sort) {
             case 'price_asc':
-                $query .= " ORDER BY price ASC"; // Sắp xếp theo giá MIN đã tính ở trên
+                $query .= " ORDER BY price ASC";
                 break;
             case 'price_desc':
                 $query .= " ORDER BY price DESC";
                 break;
-            default: // 'newest' hoặc các trường hợp khác
+            default:
                 $query .= " ORDER BY p.created_at DESC";
                 break;
         }
@@ -497,7 +487,6 @@ class ProductRepository
             return [];
         }
 
-        // Tạo chuỗi placeholder (?) cho câu lệnh IN, ví dụ: (?, ?, ?)
         $placeholders = implode(',', array_fill(0, count($categoryIDs), '?'));
 
         $query = "SELECT p.*, MIN(pv.price) as price
@@ -505,19 +494,16 @@ class ProductRepository
                   JOIN product_category_map pcm ON p.id = pcm.product_id
                   JOIN product_variants pv ON p.id = pv.product_id
                   WHERE pcm.category_id IN ($placeholders)
-                    AND p.id != ? -- Placeholder cho currentProductId
+                    AND p.id != ?
                     AND p.is_active = 1
                   GROUP BY p.id
                   ORDER BY RAND()
                   LIMIT ?";
 
-        // Gộp tất cả các tham số vào một mảng
         $params = array_merge($categoryIDs, [$currentProductId, $limit]);
 
         $stmt = $this->conn->prepare($query);
 
-        // PDO không thể bindParam với limit
-        // bind từ index 1
         foreach ($params as $key => $value) {
             $stmt->bindValue($key + 1, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
         }

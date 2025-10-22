@@ -427,7 +427,6 @@
             }
         }
 
-        // Add floating label effect
         document.querySelectorAll('.form-input').forEach(input => {
             input.addEventListener('focus', function() {
                 this.parentElement.style.transform = 'scale(1.01)';
@@ -438,7 +437,6 @@
             });
         });
 
-        // Auto-hide success message after 5 seconds
         const successAlert = document.getElementById('successAlert');
         if (successAlert) {
             setTimeout(() => {

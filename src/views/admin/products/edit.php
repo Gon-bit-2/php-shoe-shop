@@ -127,7 +127,6 @@
     </div>
 
     <script>
-        // (JavaScript giữ nguyên như cũ, không cần thay đổi)
         document.addEventListener('DOMContentLoaded', function() {
             const generateBtn = document.getElementById('generate-variants-btn');
             const variantsContainer = document.getElementById('variants-container');

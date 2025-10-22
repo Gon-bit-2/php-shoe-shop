@@ -309,7 +309,6 @@
                     addToCartBtn.textContent = 'Thêm vào giỏ hàng';
                     quantityInput.max = selectedVariant.stock;
 
-                    // Hiển thị box "Còn hàng" màu xanh
                     stockStatusElement.classList.remove('hidden', 'border-red-200', 'bg-red-50');
                     stockStatusElement.classList.add('border-green-200', 'bg-green-50');
                     stockStatusElement.innerHTML = `
@@ -326,7 +325,6 @@
                     addToCartBtn.disabled = true;
                     addToCartBtn.textContent = 'Hết hàng';
 
-                    // Hiển thị box "Hết hàng" màu đỏ
                     stockStatusElement.classList.remove('hidden', 'border-green-200', 'bg-green-50');
                     stockStatusElement.classList.add('border-red-200', 'bg-red-50');
                     stockStatusElement.innerHTML = `
@@ -355,11 +353,9 @@
                 const group = button.dataset.group;
                 const value = button.dataset.value;
                 if (button.classList.contains('selected')) {
-                    // Nếu đang được chọn, hãy bỏ chọn nó
                     button.classList.remove('selected');
                     currentSelection[group] = null;
                 } else {
-                    // Nếu không, hãy thực hiện logic chọn như cũ
                     document.querySelectorAll(`.option-btn[data-group="${group}"]`).forEach(btn => btn.classList.remove('selected'));
                     button.classList.add('selected');
                     currentSelection[group] = value;

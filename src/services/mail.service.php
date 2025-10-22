@@ -29,7 +29,6 @@ class MailService
         $subject = '';
         $bodyHeader = '';
 
-        // ... (Phần switch-case giữ nguyên, không thay đổi)
         switch ($status) {
             case 'pending':
                 $subject = 'Xác nhận đơn hàng #' . $order->id;
@@ -54,7 +53,6 @@ class MailService
 
         $mail = new PHPMailer(true);
         try {
-            // --- PHẦN CẤU HÌNH GIỮ NGUYÊN ---
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
@@ -75,13 +73,10 @@ class MailService
             $emailBody .= "<tr style='background-color:#f2f2f2;'><th>Sản phẩm</th><th>Ảnh</th><th>Số lượng</th><th>Giá</th><th>Thành tiền</th></tr>";
 
             foreach ($items as $index => $item) {
-                // 1. Chuyển đổi đường dẫn web thành đường dẫn vật lý trên server
-                // Ví dụ: /shoe-shop/public/images/products/abc.jpg -> D:/xampp/htdocs/shoe-shop/public/images/products/abc.jpg
                 $imagePath = realpath(__DIR__ . '/../../public' . str_replace('/shoe-shop/public', '', $item->image_url));
 
-                // 2. Đính kèm ảnh vào email và tạo một ID duy nhất (cid) cho nó
                 if ($imagePath && file_exists($imagePath)) {
-                    $cid = 'image' . $index; // Tạo cid duy nhất cho mỗi ảnh, ví dụ 'image0', 'image1'
+                    $cid = 'image' . $index;
                     $mail->addEmbeddedImage($imagePath, $cid, basename($imagePath));
                 } else {
                     $cid = null;
@@ -90,11 +85,11 @@ class MailService
                 $emailBody .= "<tr>";
                 $emailBody .= "<td>" . htmlspecialchars($item->product_name) . "<br><small>" . htmlspecialchars($item->variant_attributes) . "</small></td>";
 
-                // 3. Sử dụng cid trong thẻ <img>
+                // Sử dụng cid
                 if ($cid) {
                     $emailBody .= "<td align='center'><img src='cid:" . $cid . "' alt='" . htmlspecialchars($item->product_name) . "' style='width:100px; height:100px;'></td>";
                 } else {
-                    $emailBody .= "<td>(không có ảnh)</td>"; // Hiển thị nếu ảnh không tồn tại
+                    $emailBody .= "<td>(không có ảnh)</td>";
                 }
 
                 $emailBody .= "<td align='center'>" . $item->quantity . "</td>";
@@ -129,13 +124,11 @@ class MailService
      */
     public function sendPasswordResetEmail($recipientEmail, $recipientName, $token)
     {
-        // Link này trỏ đến trang reset mật khẩu trên web của bạn
         $resetLink = "http://" . $_SERVER['HTTP_HOST'] . "/shoe-shop/public/reset-password?token=" . $token;
 
         $mail = new PHPMailer(true);
 
         try {
-            // Cấu hình server (giữ nguyên)
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
@@ -145,11 +138,9 @@ class MailService
             $mail->Port       = 587;
             $mail->CharSet    = 'UTF-8';
 
-            // Người gửi, người nhận
             $mail->setFrom($_ENV['GMAIL_USERNAME'], 'ShoeShop');
             $mail->addAddress($recipientEmail, $recipientName);
 
-            // Nội dung
             $mail->isHTML(true);
             $mail->Subject = 'Yêu cầu đặt lại mật khẩu tài khoản ShoeShop';
             $mail->Body    = "

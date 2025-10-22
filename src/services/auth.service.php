@@ -38,9 +38,7 @@ class AuthService
         if (!$user->is_active) {
             return (object)['message' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.', 'status' => false];
         }
-        // if (headers_sent($file, $line)) {
-        //     die("Lỗi: Headers đã được gửi đi tại file: $file ở dòng: $line");
-        // }
+
         return (object)['message' => 'Đăng nhập thành công', 'status' => true, 'user' => $user];
     }
     function forgotPassword($email)
@@ -55,20 +53,18 @@ class AuthService
     {
         $user = $this->userRepository->findUserByEmail($email);
         if (!$user) {
-            // Vẫn trả về thành công để tránh lộ thông tin email nào tồn tại
             return ['success' => true];
         }
 
-        // Tạo một token ngẫu nhiên, an toàn
+        //token ngẫu nhiên
         $token = bin2hex(random_bytes(32));
 
-        // Đặt thời gian hết hạn (ví dụ: 1 giờ kể từ bây giờ)
+
         $expiresAt = date('Y-m-d H:i:s', time() + 3600);
 
-        // Lưu token vào database
         $this->userRepository->saveResetToken($user->id, $token, $expiresAt);
 
-        // Gửi email chứa link reset
+        // Gửi email
         $this->mailService->sendPasswordResetEmail($user->email, $user->fullname, $token);
 
         return ['success' => true];
