@@ -10,7 +10,7 @@ function renderPagination($totalPages, $currentPage, $baseUrl = '')
     echo '<nav class="mt-8 flex justify-center">';
     echo '<ul class="inline-flex items-center -space-x-px">';
 
-    // Nút Previous
+    // Nút pre
     if ($currentPage > 1) {
         $queryParams['page'] = $currentPage - 1;
         echo '<li><a href="' . $baseUrl . '?' . http_build_query($queryParams) . '" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100 hover:text-gray-700">&laquo; Trước</a></li>';
@@ -26,7 +26,7 @@ function renderPagination($totalPages, $currentPage, $baseUrl = '')
         echo '<li><a href="' . $baseUrl . '?' . http_build_query($queryParams) . '" class="' . $class . '">' . $i . '</a></li>';
     }
 
-    // Nút Next
+    // Nút next
     if ($currentPage < $totalPages) {
         $queryParams['page'] = $currentPage + 1;
         echo '<li><a href="' . $baseUrl . '?' . http_build_query($queryParams) . '" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100 hover:text-gray-700">Sau &raquo;</a></li>';

@@ -300,7 +300,7 @@ switch ($path) {
             $controller = new ProductController($conn);
             $productId = $matches[1]; // Lấy ra ID từ URL
             if ($method == 'GET') {
-                $controller->getEditPage($productId); // Gọi hàm edit với ID vừa lấy được
+                $controller->getEditPage($productId);
             } elseif ($method == 'POST') {
                 $errorMessage = $productMiddleware->validateProductBody($_POST);
                 if ($errorMessage) {

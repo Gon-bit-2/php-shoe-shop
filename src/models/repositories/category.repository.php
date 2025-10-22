@@ -9,7 +9,10 @@ class CategoryRepository
     {
         $this->conn = $conn;
     }
-
+    /**
+     * Lấy tất cả các danh mục
+     * @param mixed $activeOnly
+     */
     public function findAll($activeOnly = false)
     {
         if ($activeOnly) {
@@ -22,6 +25,10 @@ class CategoryRepository
         return $stmt->fetchAll(PDO::FETCH_CLASS, 'Category');
     }
 
+    /**
+     * Lấy danh mục theo id
+     * @param mixed $id
+     */
     public function findById($id)
     {
         $query = "SELECT * FROM categories WHERE id = :id";
@@ -31,6 +38,10 @@ class CategoryRepository
         return $stmt->fetch();
     }
 
+    /**
+     * Lưu danh mục
+     * @param Category $category
+     */
     public function save(Category $category)
     {
         $query = "INSERT INTO categories (name, slug, image_url, is_active) VALUES (:name, :slug, :image_url, :is_active)";
@@ -43,6 +54,10 @@ class CategoryRepository
         ]);
     }
 
+    /**
+     * Cập nhật danh mục
+     * @param Category $category
+     */
     public function update(Category $category)
     {
         $query = "UPDATE categories SET name = :name, slug = :slug, image_url = :image_url, is_active = :is_active WHERE id = :id";

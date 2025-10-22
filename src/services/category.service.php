@@ -41,7 +41,7 @@ class CategoryService
             return false;
         }
 
-        $imageUrl = $category->image_url; // Giữ ảnh cũ làm mặc định
+        $imageUrl = $category->image_url; // ảnh cũ
         if (isset($file['image']) && $file['image']['error'] === UPLOAD_ERR_OK) {
             $newImageUrl = $this->handleImageUpload($file['image']);
             if ($newImageUrl) {
