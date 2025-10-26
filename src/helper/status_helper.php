@@ -1,5 +1,4 @@
 <?php
-// File: src/helpers/status_helper.php
 
 function translateOrderStatus($status)
 {

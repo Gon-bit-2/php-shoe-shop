@@ -70,7 +70,7 @@
                                 <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm text-left">
                                     <a href="/shoe-shop/public/admin/products/edit/<?= $product->id ?>" class="text-indigo-600 hover:text-indigo-900">Sửa</a>
                                     <form action="/shoe-shop/public/admin/products/delete/<?= $product->id ?>" method="POST" class="inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?');">
-                                        <button type="submit" class="text-red-600 hover:text-red-900 ml-4">Xóa</button>
+                                        <button type="submit" class="text-red-600 hover:text-red-900 ml-4 hidden">Xóa</button>
                                     </form>
                                 </td>
                             </tr>

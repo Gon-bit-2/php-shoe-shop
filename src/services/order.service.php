@@ -104,10 +104,15 @@ class OrderService
         // Lấy trạng thái cũ trước khi cập nhật
         $orderBeforeUpdate = $this->orderRepository->findOrderById($orderId);
         $oldStatus = $orderBeforeUpdate ? $orderBeforeUpdate->status : null;
-
+        if ($oldStatus === 'completed' && $newStatus === 'cancelled') {
+            return false;
+        }
+        if ($oldStatus === 'completed' && $newStatus === 'completed') {
+            return false;
+        }
         $result = $this->orderRepository->updateStatus($orderId, $newStatus);
 
-        //  gửi email nếu cập nhật thành công
+        //  gửi email
         if ($result && $newStatus !== $oldStatus && in_array($newStatus, ['shipped', 'completed', 'cancelled'])) {
             $orderDetails = $this->getOrderDetail($orderId);
             $this->mailService->sendOrderStatusEmail($orderDetails);
