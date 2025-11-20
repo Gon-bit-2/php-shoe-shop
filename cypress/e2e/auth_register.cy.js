@@ -1,44 +1,41 @@
-// Đây là kịch bản kiểm thử tự động Giai đoạn 10
-// Tương ứng với Test Case: TC-AUTH-001 (Happy Path)
-
-describe("Giai đoạn 10: Kiểm thử Tự động - Chức năng Đăng ký", () => {
-  it("TC-AUTH-001: Kiểm tra luồng đăng ký thành công", () => {
-    // Tạo một email ngẫu nhiên để đảm bảo TC-AUTH-003 (Trùng email) không xảy ra
-    const randomEmail = `tester${Date.now()}@gmail.com`;
-
-    // Bước 1: Truy cập trang đăng ký
-    // Chúng ta dùng "cy.visit()" thay vì "Mở trình duyệt"
-    // Lưu ý: Đảm bảo XAMPP của bạn đang chạy
+describe("Module Xác thực - Chức năng Đăng ký", () => {
+  beforeEach(() => {
+    // Truy cập trang đăng ký trước mỗi test case
     cy.visit("http://localhost/shoe-shop/public/register");
+  });
 
-    // Bước 2: Nhập Họ tên
-    // - Tìm input có id="fullname"
-    cy.get("#fullname").type("Tester Tu Dong");
+  it("TC-AUTH-06: Đăng ký thành công với thông tin hợp lệ", () => {
+    // Tạo email ngẫu nhiên để tránh lỗi trùng lặp (TC-AUTH-05)
+    const randomEmail = `tester_${Date.now()}@gmail.com`;
 
-    // Bước 3: Nhập Email
-    // - Tìm input có id="email"
-    cy.get("#email").type(randomEmail);
+    // 1. Nhập Họ tên
+    cy.get("#fullname").type("Nguyen Van Tester"); // cy.get("#fullname"): Lấy element có id "fullname", type("Nguyen Van Tester"): Nhập giá trị "Nguyen Van Tester" vào element
 
-    // Bước 4: Nhập Mật khẩu
-    // - Tìm input có id="password"
-    cy.get("#password").type("123456");
+    // 2. Nhập Email
+    cy.get("#email").type(randomEmail); // cy.get("#email"): Lấy element có id "email", type(randomEmail): Nhập giá trị randomEmail vào element
 
-    // Bước 5: Nhập Xác nhận mật khẩu
-    // - Tìm input có id="confirm_password"
-    cy.get("#confirm_password").type("123456");
+    // 3. Nhập Mật khẩu & Xác nhận
+    cy.get("#password").type("123456"); // cy.get("#password"): Lấy element có id "password", type("123456"): Nhập giá trị "123456" vào element
+    cy.get("#confirm_password").type("123456"); // cy.get("#confirm_password"): Lấy element có id "confirm_password", type("123456"): Nhập giá trị "123456" vào element
 
-    // Bước 6: Nhấn nút "Đăng ký"
-    // - Tìm button có type="submit"
-    cy.get('button[type="submit"]').click();
+    // 4. Click nút Đăng ký
+    cy.get('button[type="submit"]').click(); // cy.get('button[type="submit"]').click(): Click nút có type="submit"
 
-    // --- Kiểm tra Kết quả mong đợi ---
+    // 5. Kiểm tra kết quả mong đợi
+    // - URL chuyển về trang login
+    cy.url().should("include", "/login"); // cy.url(): Kiểm tra URL hiện tại , should("include"): Kiểm tra URL chứa chuỗi "/login"
+    // - Hiển thị thông báo thành công (class alert-success từ file views/login.php)
+    cy.get(".alert-success").should("contain", "Đăng ký thành công"); // cy.get(".alert-success"): Lấy element có class "alert-success", should("contain"): Kiểm tra element chứa chuỗi "Đăng ký thành công"
+  });
 
-    // Kết quả 1: Hệ thống chuyển hướng đến trang Đăng nhập
-    //
-    cy.url().should("include", "/shoe-shop/public/login");
+  it("TC-AUTH-04: Đăng ký thất bại do mật khẩu không khớp", () => {
+    cy.get("#fullname").type("Tester Fail"); // cy.get("#fullname"): Lấy element có id "fullname", type("Tester Fail"): Nhập giá trị "Tester Fail" vào element
+    cy.get("#email").type("fail_pass@gmail.com"); // cy.get("#email"): Lấy element có id "email", type("fail_pass@gmail.com"): Nhập giá trị "fail_pass@gmail.com" vào element
+    cy.get("#password").type("123456"); // cy.get("#password"): Lấy element có id "password", type("123456"): Nhập giá trị "123456" vào element
+    cy.get("#confirm_password").type("654321"); // Khác mật khẩu
+    cy.get('button[type="submit"]').click(); // cy.get('button[type="submit"]').click(): Click nút có type="submit"
 
-    // Kết quả 2: Hiển thị thông báo thành công
-    //
-    cy.get(".alert-success").should("contain.text", "Đăng ký thành công");
+    // Kiểm tra hiển thị lỗi (class error-message hoặc alert-error)
+    cy.get(".alert-error").should("contain", "Mật khẩu xác nhận không khớp"); // cy.get(".alert-error"): Lấy element có class "alert-error", should("contain"): Kiểm tra element chứa chuỗi "Mật khẩu xác nhận không khớp"
   });
 });
