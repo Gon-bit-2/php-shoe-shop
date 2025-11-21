@@ -1,9 +1,16 @@
 describe("Module Giỏ hàng - Thêm sản phẩm", () => {
+  beforeEach(() => {
+    //login
+    cy.visit("http://localhost/shoe-shop/public/login");
+    cy.get("#email").type("admin@gmail.com");
+    cy.get("#password").type("12345678");
+    cy.get('button[type="submit"]').click();
+  });
   it("TC-CART-02: Thêm sản phẩm vào giỏ hàng thành công", () => {
     // it: Tạo test case
     // 1. Truy cập trang chi tiết sản phẩm (Ví dụ ID=1)
     // Lưu ý: Cần đảm bảo ID=1 tồn tại và có biến thể trong DB
-    cy.visit("http://localhost/shoe-shop/public/product/1"); // cy.visit("http://localhost/shoe-shop/public/product/1"): Truy cập trang chi tiết sản phẩm
+    cy.visit("http://localhost/shoe-shop/public/product/42"); // cy.visit("http://localhost/shoe-shop/public/product/42"): Truy cập trang chi tiết sản phẩm
 
     // 2. Chọn Size (Giả sử chọn Size đầu tiên tìm thấy)
     // Dùng selector dựa trên class 'option-btn' và data-group='Size'
@@ -23,6 +30,8 @@ describe("Module Giỏ hàng - Thêm sản phẩm", () => {
     // - Chuyển hướng sang trang giỏ hàng
     cy.url().should("include", "/cart"); // cy.url().should("include", "/cart"): Kiểm tra URL chứa "/cart"
     // - Kiểm tra có sản phẩm trong bảng giỏ hàng
-    cy.get("table tbody tr").should("have.length.at.least", 1); // cy.get("table tbody tr").should("have.length.at.least", 1): Kiểm tra có ít nhất 1 sản phẩm trong bảng giỏ hàng
+    cy.get(
+      ".w-full.lg\\:w-2\\/3 .flex.items-center.justify-between.border-b"
+    ).should("have.length.at.least", 1); // Kiểm tra có ít nhất 1 sản phẩm trong bảng giỏ hàng
   });
 });

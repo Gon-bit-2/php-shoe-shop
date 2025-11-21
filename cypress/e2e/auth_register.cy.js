@@ -15,8 +15,8 @@ describe("Module Xác thực - Chức năng Đăng ký", () => {
     cy.get("#email").type(randomEmail); // cy.get("#email"): Lấy element có id "email", type(randomEmail): Nhập giá trị randomEmail vào element
 
     // 3. Nhập Mật khẩu & Xác nhận
-    cy.get("#password").type("123456"); // cy.get("#password"): Lấy element có id "password", type("123456"): Nhập giá trị "123456" vào element
-    cy.get("#confirm_password").type("123456"); // cy.get("#confirm_password"): Lấy element có id "confirm_password", type("123456"): Nhập giá trị "123456" vào element
+    cy.get("#password").type("12345678"); // cy.get("#password"): Lấy element có id "password", type("12345678"): Nhập giá trị "12345678" vào element
+    cy.get("#confirm_password").type("12345678"); // cy.get("#confirm_password"): Lấy element có id "confirm_password", type("12345678"): Nhập giá trị "12345678" vào element
 
     // 4. Click nút Đăng ký
     cy.get('button[type="submit"]').click(); // cy.get('button[type="submit"]').click(): Click nút có type="submit"
@@ -31,11 +31,13 @@ describe("Module Xác thực - Chức năng Đăng ký", () => {
   it("TC-AUTH-04: Đăng ký thất bại do mật khẩu không khớp", () => {
     cy.get("#fullname").type("Tester Fail"); // cy.get("#fullname"): Lấy element có id "fullname", type("Tester Fail"): Nhập giá trị "Tester Fail" vào element
     cy.get("#email").type("fail_pass@gmail.com"); // cy.get("#email"): Lấy element có id "email", type("fail_pass@gmail.com"): Nhập giá trị "fail_pass@gmail.com" vào element
-    cy.get("#password").type("123456"); // cy.get("#password"): Lấy element có id "password", type("123456"): Nhập giá trị "123456" vào element
+    cy.get("#password").type("12345678"); // cy.get("#password"): Lấy element có id "password", type("12345678"): Nhập giá trị "12345678" vào element
     cy.get("#confirm_password").type("654321"); // Khác mật khẩu
     cy.get('button[type="submit"]').click(); // cy.get('button[type="submit"]').click(): Click nút có type="submit"
 
     // Kiểm tra hiển thị lỗi (class error-message hoặc alert-error)
-    cy.get(".alert-error").should("contain", "Mật khẩu xác nhận không khớp"); // cy.get(".alert-error"): Lấy element có class "alert-error", should("contain"): Kiểm tra element chứa chuỗi "Mật khẩu xác nhận không khớp"
+    cy.get("#confirm-password-error")
+      .should("be.visible") // Đảm bảo lỗi hiện lên
+      .and("contain.text", "Mật khẩu xác nhận không khớp");
   });
 });

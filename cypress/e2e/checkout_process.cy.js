@@ -2,12 +2,12 @@ describe("Module Đặt hàng - Quy trình Thanh toán (E2E)", () => {
   it("TC-ORDER-04: Đặt hàng thành công với phương thức COD", () => {
     // --- BƯỚC 1: ĐĂNG NHẬP ---
     cy.visit("http://localhost/shoe-shop/public/login");
-    cy.get("#email").type("user_test@gmail.com"); // Dùng user có sẵn
-    cy.get("#password").type("123456");
+    cy.get("#email").type("admin@gmail.com"); // Dùng user có sẵn
+    cy.get("#password").type("12345678");
     cy.get('button[type="submit"]').click();
 
     // --- BƯỚC 2: THÊM VÀO GIỎ ---
-    cy.visit("http://localhost/shoe-shop/public/product/1"); // Vào SP ID 1
+    cy.visit("http://localhost/shoe-shop/public/product/42"); // Vào SP ID 1
     // Chọn Size/Màu (Giả lập click option đầu tiên)
     cy.get('.option-btn[data-group="Size"]').first().click();
     cy.get('.option-btn[data-group="Màu sắc"]').first().click();

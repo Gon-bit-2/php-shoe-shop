@@ -6,7 +6,7 @@ describe("Module Xác thực - Chức năng Đăng nhập", () => {
     // 2. Nhập Email & Password hợp lệ
     // (Giả sử tài khoản này đã có trong DB hoặc vừa tạo ở bước trước)
     cy.get("#email").type("admin@gmail.com"); // Hoặc email test cố định
-    cy.get("#password").type("123456"); // cy.get("#email").type("admin@gmail.com"): Nhập email, cy.get("#password").type("123456"): Nhập mật khẩu
+    cy.get("#password").type("12345678"); // cy.get("#email").type("admin@gmail.com"): Nhập email, cy.get("#password").type("12345678"): Nhập mật khẩu
 
     // 3. Click Đăng nhập
     cy.get('button[type="submit"]').click(); //cy.get('button[type="submit"]').click(): bấm vào nút có type="submit" trong form đăng nhập

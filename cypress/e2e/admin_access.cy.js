@@ -3,7 +3,7 @@ describe("Module Admin - Truy cập Dashboard", () => {
     // 1. Đăng nhập với tài khoản Admin (Role ID = 1)
     cy.visit("http://localhost/shoe-shop/public/login");
     cy.get("#email").type("admin@gmail.com"); // Email của Admin
-    cy.get("#password").type("123456");
+    cy.get("#password").type("12345678");
     cy.get('button[type="submit"]').click();
 
     // 2. Truy cập trang Admin
@@ -15,6 +15,6 @@ describe("Module Admin - Truy cập Dashboard", () => {
 
     // 4. Kiểm tra các thẻ thống kê hiển thị (Doanh thu, Đơn hàng...)
     // Có 4 thẻ thống kê chính trong grid
-    cy.get(".grid-cols-4 > div").should("have.length", 4);
+    cy.get(".grid > div").should("have.length", 6);
   });
 });

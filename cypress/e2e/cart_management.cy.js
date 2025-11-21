@@ -1,7 +1,12 @@
 describe("Module Giỏ hàng - Quản lý sản phẩm", () => {
   beforeEach(() => {
+    //login
+    cy.visit("http://localhost/shoe-shop/public/login");
+    cy.get("#email").type("admin@gmail.com");
+    cy.get("#password").type("12345678");
+    cy.get('button[type="submit"]').click();
     // 1. Thêm trước 1 sản phẩm vào giỏ để có dữ liệu test
-    cy.visit("http://localhost/shoe-shop/public/product/1");
+    cy.visit("http://localhost/shoe-shop/public/product/42");
     cy.get('.option-btn[data-group="Size"]').first().click();
     cy.get('.option-btn[data-group="Màu sắc"]').first().click();
     cy.get("#add-to-cart-btn").click();
